@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F9F7"
+    tools:context=".Event_Detail">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/_20sdp">
+
+        <ImageView
+            android:id="@+id/ivDetailBanner"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_170sdp"
+            android:contentDescription="Event banner"
+            android:scaleType="centerCrop"
+            android:src="@drawable/navratri_event" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_16sdp"
+            android:background="@drawable/edittext_bg"
+            android:orientation="vertical"
+            android:padding="@dimen/_16sdp">
+
+            <TextView
+                android:id="@+id/tvDetailCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CULTURAL FEST"
+                android:textColor="@color/green"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDetailTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Navratri Garba Night"
+                android:textColor="@color/black"
+                android:textSize="@dimen/_16sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDetailDateLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Oct 15, 2026 • SG Highway, Ahmedabad"
+                android:textColor="#555555"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvDetailPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="₹499"
+                android:textColor="@color/green"
+                android:textSize="@dimen/_14sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_14sdp"
+                android:text="About Event"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDetailDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="4dp"
+                android:text="Join us for an unforgettable evening of festive music, dance, food stalls, and celebration."
+                android:textColor="#444444"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnConfirmBooking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:background="@drawable/button_bg"
+                android:text="Confirm Booking"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnBackToHome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_bg"
+                android:text="Back to Events"
+                android:textColor="@color/black"
+                app:backgroundTint="@null" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

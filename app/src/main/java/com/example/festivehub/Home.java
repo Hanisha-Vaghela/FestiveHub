@@ -1,5 +1,6 @@
 package com.example.festivehub;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -55,9 +56,17 @@ public class Home extends AppCompatActivity {
 
         addSampleEvents();
 
-        eventAdapter = new EventAdapter(allEventsList, event ->
-                Toast.makeText(Home.this, "Booking: " + event.getTitle(), Toast.LENGTH_SHORT).show()
-        );
+        eventAdapter = new EventAdapter(allEventsList, event ->{
+                Intent intent = new Intent(Home.this, Event_Detail.class);
+                intent.putExtra("title", event.getTitle());
+                intent.putExtra("category", event.getCategory());
+                intent.putExtra("dateAndLocation", event.getDateAndLocation());
+                intent.putExtra("priceText", event.getPriceText());
+                intent.putExtra("description", event.getDescription());
+                intent.putExtra("imageResId", event.getImageResId());
+                startActivity(intent);
+    });
+//        Toast.makeText(Home.this, "Booking: " + event.getTitle(), Toast.LENGTH_SHORT).show()
         rvEvents.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
         rvEvents.setAdapter(eventAdapter);
 
@@ -131,7 +140,8 @@ public class Home extends AppCompatActivity {
                 "Oct 15, 2026 • SG Highway, Ahmedabad",
                 "₹499",
                 499,
-                R.drawable.navratri_event
+                R.drawable.navratri_event,
+                "Dance the night away with live folk orchestra, traditional garba circles, and festive street food."
         ));
         allEventsList.add(new EventList(
                 "Diwali Night Bazaar & Crafts",
@@ -139,7 +149,8 @@ public class Home extends AppCompatActivity {
                 "Nov 01, 2026 • Sabarmati Riverfront, Ahmedabad",
                 "Free Entry",
                 0,
-                R.drawable.diwalinight
+                R.drawable.diwalinight,
+                "Explore handmade diyas, festive decor, local artisan stalls, and evening food counters along the riverfront."
         ));
         allEventsList.add(new EventList(
                 "Sufi & Folk Live Night",
@@ -147,7 +158,8 @@ public class Home extends AppCompatActivity {
                 "Nov 28, 2026 • Sindhu Bhavan Road, Ahmedabad",
                 "₹799",
                 799,
-                R.drawable.sufifolks
+                R.drawable.sufifolks,
+                "An evening of soulful sufi and regional folk performances under open skies with refreshments."
         ));
         allEventsList.add(new EventList(
                 "Uttarayan Kite & Heritage Fest",
@@ -155,7 +167,8 @@ public class Home extends AppCompatActivity {
                 "Jan 14, 2027 • Ashram Road, Ahmedabad",
                 "Free Entry",
                 0,
-                R.drawable.kitefest
+                R.drawable.kitefest,
+                "Celebrate Makar Sankranti with rooftop kite flying, traditional sweets like undhiyu and chikki, and music."
         ));
         allEventsList.add(new EventList(
                 "Handloom & Festive Street Fair",
@@ -163,7 +176,8 @@ public class Home extends AppCompatActivity {
                 "Feb 08, 2027 • Law Garden, Ahmedabad",
                 "₹199",
                 199,
-                R.drawable.streetfair
+                R.drawable.streetfair,
+                "Browse authentic bandhani, textiles, jewelry, and handcrafted gifts from regional makers."
         ));
         allEventsList.add(new EventList(
                 "Acoustic Sunset Jam",
@@ -171,7 +185,8 @@ public class Home extends AppCompatActivity {
                 "Feb 21, 2027 • Thaltej, Ahmedabad",
                 "₹350",
                 350,
-                R.drawable.sunset
+                R.drawable.sunset,
+                "Relax at sunset with unplugged acoustic sets, indie artists, and cozy cafe vibes."
         ));
     }
 

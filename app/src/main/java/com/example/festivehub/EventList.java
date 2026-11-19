@@ -7,14 +7,16 @@ public class EventList {
     private String priceText;
     private int priceAmount;
     private int imageResId;
+    private String description;
 
-    public EventList(String title, String category, String dateAndLocation, String priceText, int priceAmount, int imageResId) {
+    public EventList(String title, String category, String dateAndLocation, String priceText, int priceAmount, int imageResId, String description) {
         this.title = title;
         this.category = category;
         this.dateAndLocation = dateAndLocation;
         this.priceText = priceText;
         this.priceAmount = priceAmount;
         this.imageResId = imageResId;
+        this.description = description;
     }
 
     public String getTitle() {
@@ -63,5 +65,13 @@ public class EventList {
 
     public void setImageResId(int imageResId) {
         this.imageResId = imageResId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
