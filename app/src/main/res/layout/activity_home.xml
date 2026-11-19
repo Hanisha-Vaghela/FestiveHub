@@ -5,11 +5,10 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F7F9F7"
     android:orientation="vertical"
-    android:gravity="center"
     tools:context=".Home">
 
-    <!-- Top Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +35,6 @@
             android:textColor="#E8F5E9"
             android:textSize="@dimen/_11sdp" />
 
-        <!-- Search Bar -->
         <EditText
             android:id="@+id/etSearchEvents"
             android:layout_width="match_parent"
@@ -52,19 +50,119 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Section Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_14sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:text="Categories"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_13sdp"
+        android:textStyle="bold" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="@dimen/_16sdp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCatAll"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/button_bg"
+                android:paddingHorizontal="16dp"
+                android:text="All"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnCatCultural"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/edittext_bg"
+                android:paddingHorizontal="16dp"
+                android:text="CULTURAL FEST"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnCatMarketplace"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/edittext_bg"
+                android:paddingHorizontal="16dp"
+                android:text="MARKETPLACE"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnCatMusic"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:background="@drawable/edittext_bg"
+                android:paddingHorizontal="16dp"
+                android:text="MUSIC"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnFilterFree"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/edittext_bg"
+            android:paddingHorizontal="14dp"
+            android:text="Free Entry"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:backgroundTint="@null" />
+
+        <Button
+            android:id="@+id/btnFilterUnder500"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:background="@drawable/edittext_bg"
+            android:paddingHorizontal="14dp"
+            android:text="Under ₹500"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_12sdp"
         android:layout_marginBottom="8dp"
         android:text="Upcoming Events"
         android:textColor="@color/black"
         android:textSize="@dimen/_14sdp"
         android:textStyle="bold" />
 
-    <!-- Event Cards List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvEvents"
         android:layout_width="match_parent"
