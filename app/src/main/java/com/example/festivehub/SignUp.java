@@ -30,8 +30,8 @@ public class SignUp extends AppCompatActivity {
         email = findViewById(R.id.signup_email);
         mobilenumber = findViewById(R.id.signup_password);
         password = findViewById(R.id.signup_password);
-        confirmpassword = findViewById(R.id.signup_confirmPassword);
-        signupbtn = findViewById(R.id.signup_btn);
+        confirmpassword = findViewById(R.id.signup_confirm_password);
+        signupbtn = findViewById(R.id.btnSignUp);
         login = findViewById(R.id.signup_login);
 
         signupbtn.setOnClickListener(view -> {
