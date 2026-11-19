@@ -5,94 +5,98 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".SignUp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/green"
-        android:text="Welcome to the FestiveHub"
-        android:textSize="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_10sdp"
         android:layout_gravity="center"
-        />
+        android:layout_marginTop="@dimen/_10sdp"
+        android:text="Welcome to the FestiveHub"
+        android:textColor="@color/green"
+        android:textSize="@dimen/_20sdp" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/green"
-        android:text="Join FestiveHub and celebrate every moment!"
-        android:textSize="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_10sdp"
         android:layout_gravity="center"
-        />
+        android:layout_marginTop="@dimen/_10sdp"
+        android:text="Join FestiveHub and celebrate every moment!"
+        android:textColor="@color/green"
+        android:textSize="@dimen/_10sdp" />
 
     <EditText
+        android:id="@+id/signup_name"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginHorizontal="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_30sdp"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_40sdp"
-        android:textColorHint="#A8A5A5"
+        android:background="@drawable/edittext_bg"
         android:hint="Hanisha Vaghela"
+        android:inputType="textPersonName"
         android:paddingHorizontal="@dimen/_20sdp"
-        android:background="@drawable/edittext_bg"
-        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:textColorHint="#A8A5A5" />
 
-        />
     <EditText
-        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/signup_email"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
-        android:textColorHint="#A8A5A5"
+        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:background="@drawable/edittext_bg"
         android:hint="hanisha65@gmail.com"
+        android:inputType="textEmailAddress"
         android:paddingHorizontal="@dimen/_20sdp"
-        android:background="@drawable/edittext_bg"
-        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:textColorHint="#A8A5A5" />
 
-        />
     <EditText
-        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/signup_phone"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
-        android:textColorHint="#A8A5A5"
+        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:background="@drawable/edittext_bg"
         android:hint="+91 7041165889"
+        android:inputType="phone"
         android:paddingHorizontal="@dimen/_20sdp"
-        android:background="@drawable/edittext_bg"
-        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:textColorHint="#A8A5A5" />
 
-        />
     <EditText
-        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/signup_password"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
-        android:textColorHint="#A8A5A5"
+        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:background="@drawable/edittext_bg"
         android:hint="password"
         android:inputType="textPassword"
         android:paddingHorizontal="@dimen/_20sdp"
-        android:background="@drawable/edittext_bg"
-        android:layout_marginHorizontal="@dimen/_20sdp"
+        android:textColorHint="#A8A5A5" />
 
-        />
     <EditText
-        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/signup_confirm_password"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
-        android:textColorHint="#A8A5A5"
-        android:hint="confirm password"
-        android:paddingHorizontal="@dimen/_20sdp"
-        android:background="@drawable/edittext_bg"
         android:layout_marginHorizontal="@dimen/_20sdp"
-        />
+        android:layout_marginTop="@dimen/_20sdp"
+        android:background="@drawable/edittext_bg"
+        android:hint="confirm password"
+        android:inputType="textPassword"
+        android:paddingHorizontal="@dimen/_20sdp"
+        android:textColorHint="#A8A5A5" />
+
     <Button
+        android:id="@+id/btnSignUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_20sdp"
-        android:text="SignUp"
-        app:backgroundTint="@null"
         android:background="@drawable/button_bg"
+        android:text="SignUp"
+        app:backgroundTint="@null" />
 
-        />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -114,6 +118,5 @@
             android:textColor="@color/green"
             android:textStyle="bold" />
     </LinearLayout>
-
 
 </LinearLayout>
