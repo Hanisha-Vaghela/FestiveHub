@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FestiveHub">
         <activity
+            android:name=".Volunteers_QR"
+            android:exported="false" />
+        <activity
             android:name=".Event_Detail"
             android:exported="false" />
         <activity

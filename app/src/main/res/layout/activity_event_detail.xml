@@ -15,7 +15,7 @@
         android:paddingBottom="@dimen/_20sdp">
 
         <ImageView
-            android:id="@+id/ivDetailBanner"
+            android:id="@+id/eventdetail_DetailBanner"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_170sdp"
             android:contentDescription="Event banner"
@@ -31,7 +31,7 @@
             android:padding="@dimen/_16sdp">
 
             <TextView
-                android:id="@+id/tvDetailCategory"
+                android:id="@+id/eventdetail_DetailCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CULTURAL FEST"
@@ -40,7 +40,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvDetailTitle"
+                android:id="@+id/eventdetail_DetailTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -50,7 +50,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvDetailDateLocation"
+                android:id="@+id/eventdetail_DetailDateLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -59,7 +59,7 @@
                 android:textSize="13sp" />
 
             <TextView
-                android:id="@+id/tvDetailPrice"
+                android:id="@+id/eventdetail_DetailPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -78,7 +78,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvDetailDescription"
+                android:id="@+id/eventdetail_DetailDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -88,7 +88,7 @@
                 android:textSize="13sp" />
 
             <Button
-                android:id="@+id/btnConfirmBooking"
+                android:id="@+id/eventdetail_btnConfirmBooking"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_20sdp"
@@ -98,12 +98,21 @@
                 app:backgroundTint="@null" />
 
             <Button
-                android:id="@+id/btnBackToHome"
+                android:id="@+id/eventdetail_btnBackToHome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_bg"
                 android:text="Back to Events"
+                android:textColor="@color/black"
+                app:backgroundTint="@null" />
+            <Button
+                android:id="@+id/eventdetail_btnvolunteerqr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_bg"
+                android:text="Scan QR for Volunteer"
                 android:textColor="@color/black"
                 app:backgroundTint="@null" />
         </LinearLayout>

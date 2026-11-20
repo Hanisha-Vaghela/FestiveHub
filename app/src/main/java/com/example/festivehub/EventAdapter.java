@@ -7,10 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
@@ -18,10 +16,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     public interface OnBookClickListener {
         void onBookClick(EventList allEventsList);
     }
-
     private ArrayList<EventList> allEventsList;
     private OnBookClickListener listener;
-
     public EventAdapter(ArrayList<EventList> allEventsList, OnBookClickListener listener) {
         this.allEventsList = allEventsList;
         this.listener = listener;
