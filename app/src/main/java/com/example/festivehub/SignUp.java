@@ -9,17 +9,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SignUp extends AppCompatActivity {
 
     TextView login;
     EditText name,email,mobilenumber,password,confirmpassword;
     Button signupbtn;
-
+    private FirebaseAuth auth;
+ 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +36,12 @@ public class SignUp extends AppCompatActivity {
 
         name = findViewById(R.id.signup_name);
         email = findViewById(R.id.signup_email);
-        mobilenumber = findViewById(R.id.signup_password);
+        mobilenumber = findViewById(R.id.signup_phone);
         password = findViewById(R.id.signup_password);
         confirmpassword = findViewById(R.id.signup_confirm_password);
         signupbtn = findViewById(R.id.btnSignUp);
         login = findViewById(R.id.signup_login);
+        auth = FirebaseAuth.getInstance();
 
         signupbtn.setOnClickListener(view -> {
             String name_text = name.getText().toString().trim();
@@ -86,15 +95,32 @@ public class SignUp extends AppCompatActivity {
                 confirmpassword.requestFocus();
                 return;
             }else {
-                    Toast.makeText(this,"User Added Successfully!",Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, Home.class));
-                    finish();
+//                    Toast.makeText(this,"User Added Successfully!",Toast.LENGTH_SHORT).show();
+//                    startActivity(new Intent(this, Home.class));
+//                    finish();
+                registerUser(name_text,email_text,password_text);
         }
         });
 
         login.setOnClickListener(view -> {
             startActivity(new Intent(this, Login.class));
             finish();
+        });
+    }
+
+    private void registerUser(String nameText, String emailText, String passwordText) {
+        auth.createUserWithEmailAndPassword(emailText,passwordText).addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+           if (task.isSuccessful()) {
+               Toast.makeText(SignUp.this, "User Added Successfully!", Toast.LENGTH_SHORT).show();
+               startActivity(new Intent(SignUp.this, Home.class));
+               finish();
+                }else {
+                     Toast.makeText(SignUp.this, "Registration Failed !", Toast.LENGTH_SHORT).show();
+
+           }
+            }
         });
     }
 }

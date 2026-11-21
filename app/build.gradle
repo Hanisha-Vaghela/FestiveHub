@@ -45,7 +45,10 @@ dependencies {
     // implementation 'com.google.firebase:firebase-storage'   // only if you upload images
 
     // UI helper
-    implementation 'com.intuit.sdp:sdp-android:1.1.1' // sdp
+    implementation 'com.intuit.sdp:sdp-android:1.1.1'
+    implementation libs.credentials
+    implementation libs.credentials.play.services.auth
+    implementation libs.googleid// sdp
 
     // Testing
     testImplementation libs.junit
