@@ -1,30 +1,33 @@
 package com.example.festivehub;
 
-import android.media.metrics.Event;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     public interface OnBookClickListener {
-        void onBookClick(EventList allEventsList);
+        void onBookClick(EventList event);
     }
-    private ArrayList<EventList> allEventsList;
-    private OnBookClickListener listener;
-    public EventAdapter(ArrayList<EventList> allEventsList, OnBookClickListener listener) {
-        this.allEventsList = allEventsList;
+
+    private ArrayList<EventList> eventList;
+    private final OnBookClickListener listener;
+
+    public EventAdapter(ArrayList<EventList> eventList, OnBookClickListener listener) {
+        this.eventList = eventList;
         this.listener = listener;
     }
 
     public void setFilteredList(ArrayList<EventList> filteredList) {
-        this.allEventsList = filteredList;
+        this.eventList = filteredList;
         notifyDataSetChanged();
     }
 
@@ -37,24 +40,26 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        EventList currentEvent = allEventsList.get(position);
+        EventList event = eventList.get(position);
 
-        holder.ivEventBanner.setImageResource(currentEvent.getImageResId());
-        holder.tvEventCategory.setText(currentEvent.getCategory());
-        holder.tvEventTitle.setText(currentEvent.getTitle());
-        holder.tvEventDateLocation.setText(currentEvent.getDateAndLocation());
-        holder.tvEventPrice.setText(currentEvent.getPriceText());
+        ImageUtil.loadEventImage(holder.ivEventBanner, event);
+        holder.tvEventCategory.setText(event.getCategory());
+        holder.tvEventTitle.setText(event.getTitle());
+        holder.tvEventDateLocation.setText(event.getDateAndLocation());
+        holder.tvEventPrice.setText(event.getPriceText());
 
-        holder.btnBookEvent.setOnClickListener(v -> {
+        View.OnClickListener open = v -> {
             if (listener != null) {
-                listener.onBookClick(currentEvent);
+                listener.onBookClick(event);
             }
-        });
+        };
+        holder.btnBookEvent.setOnClickListener(open);
+        holder.itemView.setOnClickListener(open);
     }
 
     @Override
     public int getItemCount() {
-        return allEventsList.size();
+        return eventList.size();
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {

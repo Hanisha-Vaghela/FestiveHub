@@ -1,175 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F9F7"
-    android:orientation="vertical"
+    android:fillViewport="true"
     tools:context=".Home">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/green"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/_20sdp"
-        android:paddingTop="@dimen/_20sdp"
-        android:paddingBottom="@dimen/_16sdp">
-
-        <TextView
-            android:id="@+id/tvGreeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello, Explorer!"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/_18sdp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Discover upcoming festivals and events near you"
-            android:textColor="#E8F5E9"
-            android:textSize="@dimen/_11sdp" />
-
-        <EditText
-            android:id="@+id/etSearchEvents"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_38sdp"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:background="@drawable/edittext_bg"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="10dp"
-            android:hint="Search festivals, concerts, workshops..."
-            android:inputType="text"
-            android:paddingHorizontal="@dimen/_14sdp"
-            android:textColorHint="#888888"
-            android:textSize="14sp" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:text="Categories"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_13sdp"
-        android:textStyle="bold" />
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:paddingHorizontal="@dimen/_16sdp"
-        android:scrollbars="none">
+        android:orientation="vertical">
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/_20sdp"
+            android:paddingTop="@dimen/_20sdp"
+            android:paddingBottom="@dimen/_16sdp">
+
+            <TextView
+                android:id="@+id/tvGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hello, Explorer!"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Discover upcoming festivals and events near you"
+                android:textColor="#E8F5E9"
+                android:textSize="@dimen/_11sdp" />
+
+            <EditText
+                android:id="@+id/etSearchEvents"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_38sdp"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/edittext_bg"
+                android:drawableStart="@android:drawable/ic_menu_search"
+                android:drawablePadding="10dp"
+                android:hint="Search festivals, concerts, workshops..."
+                android:inputType="text"
+                android:paddingHorizontal="@dimen/_14sdp"
+                android:textColorHint="#888888"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBanner"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_110sdp"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:visibility="gone"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:text="Categories"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_13sdp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="@dimen/_16sdp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCatAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/button_bg"
+                    android:paddingHorizontal="16dp"
+                    android:text="All"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    app:backgroundTint="@null" />
+
+                <Button
+                    android:id="@+id/btnCatCultural"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/edittext_bg"
+                    android:paddingHorizontal="16dp"
+                    android:text="CULTURAL FEST"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    app:backgroundTint="@null" />
+
+                <Button
+                    android:id="@+id/btnCatMarketplace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/edittext_bg"
+                    android:paddingHorizontal="16dp"
+                    android:text="MARKETPLACE"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    app:backgroundTint="@null" />
+
+                <Button
+                    android:id="@+id/btnCatMusic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:background="@drawable/edittext_bg"
+                    android:paddingHorizontal="16dp"
+                    android:text="MUSIC"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    app:backgroundTint="@null" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnCatAll"
+                android:id="@+id/btnFilterFree"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/button_bg"
-                android:paddingHorizontal="16dp"
-                android:text="All"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"
-                app:backgroundTint="@null" />
-
-            <Button
-                android:id="@+id/btnCatCultural"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
+                android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/edittext_bg"
-                android:paddingHorizontal="16dp"
-                android:text="CULTURAL FEST"
+                android:paddingHorizontal="14dp"
+                android:text="Free Entry"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 app:backgroundTint="@null" />
 
             <Button
-                android:id="@+id/btnCatMarketplace"
+                android:id="@+id/btnFilterUnder500"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:layout_marginEnd="8dp"
+                android:layout_height="36dp"
                 android:background="@drawable/edittext_bg"
-                android:paddingHorizontal="16dp"
-                android:text="MARKETPLACE"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                app:backgroundTint="@null" />
-
-            <Button
-                android:id="@+id/btnCatMusic"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:background="@drawable/edittext_bg"
-                android:paddingHorizontal="16dp"
-                android:text="MUSIC"
+                android:paddingHorizontal="14dp"
+                android:text="Under ₹500"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 app:backgroundTint="@null" />
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_16sdp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btnFilterFree"
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/edittext_bg"
-            android:paddingHorizontal="14dp"
-            android:text="Free Entry"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginBottom="8dp"
+            android:text="Upcoming Events"
             android:textColor="@color/black"
-            android:textSize="12sp"
-            app:backgroundTint="@null" />
+            android:textSize="@dimen/_14sdp"
+            android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btnFilterUnder500"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:background="@drawable/edittext_bg"
-            android:paddingHorizontal="14dp"
-            android:text="Under ₹500"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:backgroundTint="@null" />
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:gravity="center"
+            android:text="Loading events..."
+            android:textColor="#777777"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvEvents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            android:paddingHorizontal="@dimen/_16sdp"
+            android:paddingBottom="@dimen/_20sdp"
+            tools:listitem="@layout/item_event_card" />
+
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:layout_marginBottom="8dp"
-        android:text="Upcoming Events"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_14sdp"
-        android:textStyle="bold" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvEvents"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingHorizontal="@dimen/_16sdp"
-        android:paddingBottom="@dimen/_20sdp"
-        tools:listitem="@layout/item_event_card" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

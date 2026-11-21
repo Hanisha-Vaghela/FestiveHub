@@ -3,19 +3,26 @@ package com.example.festivehub;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 
@@ -23,15 +30,36 @@ public class Home extends AppCompatActivity {
 
     RecyclerView rvEvents;
     EditText etSearchEvents;
+    TextView tvEmpty;
     Button btnCatAll, btnCatCultural, btnCatMarketplace, btnCatMusic;
     Button btnFilterFree, btnFilterUnder500;
+    MaterialCardView cardBanner;
+    ViewPager2 vpBanner;
 
     ArrayList<EventList> allEventsList = new ArrayList<>();
     EventAdapter eventAdapter;
+    BannerAdapter bannerAdapter;
+
+    FirebaseFirestore db;
+    ListenerRegistration eventsListener;
+    boolean eventsLoaded = false;
 
     String activeCategory = "ALL";
     String activePriceFilter = "ALL"; // "ALL", "FREE", "UNDER_500"
     String searchText = "";
+
+    // Auto-slide for the banner carousel
+    private final Handler sliderHandler = new Handler(Looper.getMainLooper());
+    private final Runnable sliderRunnable = new Runnable() {
+        @Override
+        public void run() {
+            int count = bannerAdapter.getItemCount();
+            if (count > 1) {
+                vpBanner.setCurrentItem((vpBanner.getCurrentItem() + 1) % count, true);
+            }
+            sliderHandler.postDelayed(this, 3000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +67,11 @@ public class Home extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
-
         rvEvents = findViewById(R.id.rvEvents);
         etSearchEvents = findViewById(R.id.etSearchEvents);
+        tvEmpty = findViewById(R.id.tvEmpty);
+        cardBanner = findViewById(R.id.cardBanner);
+        vpBanner = findViewById(R.id.vpBanner);
         btnCatAll = findViewById(R.id.btnCatAll);
         btnCatCultural = findViewById(R.id.btnCatCultural);
         btnCatMarketplace = findViewById(R.id.btnCatMarketplace);
@@ -54,22 +79,78 @@ public class Home extends AppCompatActivity {
         btnFilterFree = findViewById(R.id.btnFilterFree);
         btnFilterUnder500 = findViewById(R.id.btnFilterUnder500);
 
-        addSampleEvents();
+        db = FirebaseFirestore.getInstance();
 
-        eventAdapter = new EventAdapter(allEventsList, event ->{
-                Intent intent = new Intent(Home.this, Event_Detail.class);
-                intent.putExtra("title", event.getTitle());
-                intent.putExtra("category", event.getCategory());
-                intent.putExtra("dateAndLocation", event.getDateAndLocation());
-                intent.putExtra("priceText", event.getPriceText());
-                intent.putExtra("description", event.getDescription());
-                intent.putExtra("imageResId", event.getImageResId());
-                startActivity(intent);
-    });
-//        Toast.makeText(Home.this, "Booking: " + event.getTitle(), Toast.LENGTH_SHORT).show()
-        rvEvents.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        // Event list
+        eventAdapter = new EventAdapter(new ArrayList<>(), this::openEventDetail);
+        rvEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvEvents.setAdapter(eventAdapter);
 
+        // Banner carousel
+        bannerAdapter = new BannerAdapter(this::openEventDetail);
+        vpBanner.setAdapter(bannerAdapter);
+
+        setupFilters();
+        refreshButtons();
+
+        // TODO: delete this line after the first run (it uploads the 6 sample events once)
+        EventSeeder.seedIfEmpty(db);
+
+        loadEvents();
+    }
+
+    private void loadEvents() {
+        tvEmpty.setVisibility(View.VISIBLE);
+        tvEmpty.setText("Loading events...");
+
+        // Real-time listener: Home updates by itself when events change in Firestore
+        eventsListener = db.collection("events").addSnapshotListener((snapshots, error) -> {
+            if (error != null) {
+                tvEmpty.setVisibility(View.VISIBLE);
+                tvEmpty.setText("Couldn't load events");
+                Toast.makeText(Home.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            allEventsList.clear();
+            if (snapshots != null) {
+                for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                    EventList event = doc.toObject(EventList.class);
+                    if (event != null) {
+                        allEventsList.add(event);
+                    }
+                }
+            }
+            eventsLoaded = true;
+            updateBanner();
+            filterEventsList();
+        });
+    }
+
+    private void openEventDetail(EventList event) {
+        Intent intent = new Intent(Home.this, Event_Detail.class);
+        intent.putExtra("eventId", event.getId());
+        startActivity(intent);
+    }
+
+    private void updateBanner() {
+        ArrayList<EventList> banners = new ArrayList<>();
+        for (EventList event : allEventsList) {
+            if (event.isFeatured()) {
+                banners.add(event);
+            }
+        }
+        // No featured events? Use the first few events instead
+        if (banners.isEmpty()) {
+            for (int i = 0; i < Math.min(5, allEventsList.size()); i++) {
+                banners.add(allEventsList.get(i));
+            }
+        }
+        bannerAdapter.setItems(banners);
+        cardBanner.setVisibility(banners.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void setupFilters() {
         btnCatAll.setOnClickListener(v -> {
             activeCategory = "ALL";
             refreshButtons();
@@ -95,21 +176,13 @@ public class Home extends AppCompatActivity {
         });
 
         btnFilterFree.setOnClickListener(v -> {
-            if (activePriceFilter.equals("FREE")) {
-                activePriceFilter = "ALL";
-            } else {
-                activePriceFilter = "FREE";
-            }
+            activePriceFilter = activePriceFilter.equals("FREE") ? "ALL" : "FREE";
             refreshButtons();
             filterEventsList();
         });
 
         btnFilterUnder500.setOnClickListener(v -> {
-            if (activePriceFilter.equals("UNDER_500")) {
-                activePriceFilter = "ALL";
-            } else {
-                activePriceFilter = "UNDER_500";
-            }
+            activePriceFilter = activePriceFilter.equals("UNDER_500") ? "ALL" : "UNDER_500";
             refreshButtons();
             filterEventsList();
         });
@@ -129,75 +202,18 @@ public class Home extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-
-        refreshButtons();
     }
 
-    private void addSampleEvents() {
-        allEventsList.add(new EventList(
-                "Navratri Garba Night",
-                "CULTURAL FEST",
-                "Oct 15, 2026 • SG Highway, Ahmedabad",
-                "₹499",
-                499,
-                R.drawable.navratri_event,
-                "Dance the night away with live folk orchestra, traditional garba circles, and festive street food."
-        ));
-        allEventsList.add(new EventList(
-                "Diwali Night Bazaar & Crafts",
-                "MARKETPLACE",
-                "Nov 01, 2026 • Sabarmati Riverfront, Ahmedabad",
-                "Free Entry",
-                0,
-                R.drawable.diwalinight,
-                "Explore handmade diyas, festive decor, local artisan stalls, and evening food counters along the riverfront."
-        ));
-        allEventsList.add(new EventList(
-                "Sufi & Folk Live Night",
-                "MUSIC",
-                "Nov 28, 2026 • Sindhu Bhavan Road, Ahmedabad",
-                "₹799",
-                799,
-                R.drawable.sufifolks,
-                "An evening of soulful sufi and regional folk performances under open skies with refreshments."
-        ));
-        allEventsList.add(new EventList(
-                "Uttarayan Kite & Heritage Fest",
-                "CULTURAL FEST",
-                "Jan 14, 2027 • Ashram Road, Ahmedabad",
-                "Free Entry",
-                0,
-                R.drawable.kitefest,
-                "Celebrate Makar Sankranti with rooftop kite flying, traditional sweets like undhiyu and chikki, and music."
-        ));
-        allEventsList.add(new EventList(
-                "Handloom & Festive Street Fair",
-                "MARKETPLACE",
-                "Feb 08, 2027 • Law Garden, Ahmedabad",
-                "₹199",
-                199,
-                R.drawable.streetfair,
-                "Browse authentic bandhani, textiles, jewelry, and handcrafted gifts from regional makers."
-        ));
-        allEventsList.add(new EventList(
-                "Acoustic Sunset Jam",
-                "MUSIC",
-                "Feb 21, 2027 • Thaltej, Ahmedabad",
-                "₹350",
-                350,
-                R.drawable.sunset,
-                "Relax at sunset with unplugged acoustic sets, indie artists, and cozy cafe vibes."
-        ));
+    private boolean contains(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 
     private void filterEventsList() {
         ArrayList<EventList> filteredList = new ArrayList<>();
 
-        for (int i = 0; i < allEventsList.size(); i++) {
-            EventList event = allEventsList.get(i);
-
+        for (EventList event : allEventsList) {
             boolean categoryMatches = activeCategory.equals("ALL")
-                    || event.getCategory().equalsIgnoreCase(activeCategory);
+                    || activeCategory.equalsIgnoreCase(event.getCategory());
 
             boolean priceMatches = true;
             if (activePriceFilter.equals("FREE")) {
@@ -208,10 +224,9 @@ public class Home extends AppCompatActivity {
 
             boolean searchMatches = true;
             if (!searchText.isEmpty()) {
-                boolean inTitle = event.getTitle().toLowerCase().contains(searchText);
-                boolean inLocation = event.getDateAndLocation().toLowerCase().contains(searchText);
-                boolean inCategory = event.getCategory().toLowerCase().contains(searchText);
-                searchMatches = inTitle || inLocation || inCategory;
+                searchMatches = contains(event.getTitle(), searchText)
+                        || contains(event.getDateAndLocation(), searchText)
+                        || contains(event.getCategory(), searchText);
             }
 
             if (categoryMatches && priceMatches && searchMatches) {
@@ -220,6 +235,15 @@ public class Home extends AppCompatActivity {
         }
 
         eventAdapter.setFilteredList(filteredList);
+
+        if (filteredList.isEmpty() && eventsLoaded) {
+            tvEmpty.setText("No events found");
+            tvEmpty.setVisibility(View.VISIBLE);
+        } else if (filteredList.isEmpty()) {
+            tvEmpty.setVisibility(View.VISIBLE);
+        } else {
+            tvEmpty.setVisibility(View.GONE);
+        }
     }
 
     private void refreshButtons() {
@@ -250,6 +274,26 @@ public class Home extends AppCompatActivity {
         } else {
             btnFilterUnder500.setBackgroundResource(R.drawable.edittext_bg);
             btnFilterUnder500.setTextColor(Color.BLACK);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sliderHandler.postDelayed(sliderRunnable, 3000);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sliderHandler.removeCallbacks(sliderRunnable);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (eventsListener != null) {
+            eventsListener.remove();
         }
     }
 }
