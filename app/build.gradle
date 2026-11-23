@@ -56,11 +56,17 @@ dependencies {
     androidTestImplementation libs.espresso.core
 
     //QR code
-//    implementation("com.journeys:zxing-android-embedded:4.3.0")
+    //    implementation("com.journeys:zxing-android-embedded:4.3.0")
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     implementation 'com.google.zxing:core:3.5.3'
-//glide
+
+    //glide
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
+    // Image loading (banners from URL) + carousel
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
 
 }

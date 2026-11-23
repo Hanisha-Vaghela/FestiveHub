@@ -145,20 +145,36 @@ public class Event_Detail extends AppCompatActivity {
 
         btnConfirmBooking.setEnabled(false);
         String uid = user.getUid();
-        WriteBatch batch = db.batch();
 
         if (registered) {
+            WriteBatch batch = db.batch();
             batch.delete(eventRegistrationRef(uid));
             batch.delete(userRegistrationRef(uid));
-        } else {
-            // Under the event: who joined (volunteers/admin can use this list)
+            commitRegistration(batch);
+            return;
+        }
+
+        // Read the user's saved name and mobile so the admin can see who joined
+        db.collection("users").document(uid).get().addOnCompleteListener(task -> {
+            String name = null;
+            String mobile = null;
+            if (task.isSuccessful() && task.getResult() != null) {
+                name = task.getResult().getString("name");
+                mobile = task.getResult().getString("mobile");
+            }
+
+            WriteBatch batch = db.batch();
+
+            // Under the event: who joined (the admin's "Registered Users" list)
             Map<String, Object> eventSide = new HashMap<>();
             eventSide.put("userId", uid);
+            eventSide.put("name", name != null ? name : "");
             eventSide.put("email", user.getEmail());
+            eventSide.put("mobile", mobile != null ? mobile : "");
             eventSide.put("registeredAt", FieldValue.serverTimestamp());
             batch.set(eventRegistrationRef(uid), eventSide);
 
-            // Under the user: events they joined (for the profile screen)
+            // Under the user: events they joined (the profile screen)
             Map<String, Object> userSide = new HashMap<>();
             userSide.put("eventId", eventId);
             userSide.put("title", currentEvent.getTitle());
@@ -168,8 +184,12 @@ public class Event_Detail extends AppCompatActivity {
             userSide.put("imageName", currentEvent.getImageName());
             userSide.put("registeredAt", FieldValue.serverTimestamp());
             batch.set(userRegistrationRef(uid), userSide);
-        }
 
+            commitRegistration(batch);
+        });
+    }
+
+    private void commitRegistration(WriteBatch batch) {
         batch.commit()
                 .addOnSuccessListener(unused -> {
                     registered = !registered;

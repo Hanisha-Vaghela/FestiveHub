@@ -12,6 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FestiveHub">
         <activity
+            android:name=".RegisteredUsers"
+            android:exported="false" />
+        <activity
+            android:name=".ManageList"
+            android:exported="false" />
+        <activity
+            android:name=".ManageForm"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".Profile"
+            android:exported="false" />
+        <activity
             android:name=".Volunteers_QR"
             android:exported="false" />
         <activity

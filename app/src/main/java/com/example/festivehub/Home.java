@@ -10,16 +10,20 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -30,7 +34,8 @@ public class Home extends AppCompatActivity {
 
     RecyclerView rvEvents;
     EditText etSearchEvents;
-    TextView tvEmpty;
+    TextView tvEmpty, tvGreeting;
+    ImageView ivProfile, ivLogout;
     Button btnCatAll, btnCatCultural, btnCatMarketplace, btnCatMusic;
     Button btnFilterFree, btnFilterUnder500;
     MaterialCardView cardBanner;
@@ -70,6 +75,9 @@ public class Home extends AppCompatActivity {
         rvEvents = findViewById(R.id.rvEvents);
         etSearchEvents = findViewById(R.id.etSearchEvents);
         tvEmpty = findViewById(R.id.tvEmpty);
+        tvGreeting = findViewById(R.id.tvGreeting);
+        ivProfile = findViewById(R.id.ivProfile);
+        ivLogout = findViewById(R.id.ivLogout);
         cardBanner = findViewById(R.id.cardBanner);
         vpBanner = findViewById(R.id.vpBanner);
         btnCatAll = findViewById(R.id.btnCatAll);
@@ -90,6 +98,10 @@ public class Home extends AppCompatActivity {
         bannerAdapter = new BannerAdapter(this::openEventDetail);
         vpBanner.setAdapter(bannerAdapter);
 
+        ivProfile.setOnClickListener(v -> startActivity(new Intent(Home.this, Profile.class)));
+        ivLogout.setOnClickListener(v -> confirmLogout());
+        loadGreeting();
+
         setupFilters();
         refreshButtons();
 
@@ -97,6 +109,36 @@ public class Home extends AppCompatActivity {
         EventSeeder.seedIfEmpty(db);
 
         loadEvents();
+    }
+
+    private void confirmLogout() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Do you want to log out?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Logout", (dialog, which) -> {
+                    FirebaseAuth.getInstance().signOut();
+                    Toast.makeText(Home.this, "Logged out", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(Home.this, Login.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .show();
+    }
+
+    // "Hello, <first name>!" from the saved profile
+    private void loadGreeting() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            return;
+        }
+        db.collection("users").document(user.getUid()).get().addOnSuccessListener(doc -> {
+            String name = doc.getString("name");
+            if (name != null && !name.trim().isEmpty()) {
+                tvGreeting.setText("Hello, " + name.trim().split(" ")[0] + "!");
+            }
+        });
     }
 
     private void loadEvents() {

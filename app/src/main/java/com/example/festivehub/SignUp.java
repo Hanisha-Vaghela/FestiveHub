@@ -20,6 +20,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignUp extends AppCompatActivity {
 
@@ -98,8 +103,8 @@ public class SignUp extends AppCompatActivity {
 //                    Toast.makeText(this,"User Added Successfully!",Toast.LENGTH_SHORT).show();
 //                    startActivity(new Intent(this, Home.class));
 //                    finish();
-                registerUser(name_text,email_text,password_text);
-        }
+                registerUser(name_text, email_text, mobile_text, password_text);
+            }
         });
 
         login.setOnClickListener(view -> {
@@ -108,16 +113,32 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
-    private void registerUser(String nameText, String emailText, String passwordText) {
+    private void registerUser(String nameText, String emailText,String mobileText, String passwordText) {
         auth.createUserWithEmailAndPassword(emailText,passwordText).addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
            if (task.isSuccessful()) {
-               Toast.makeText(SignUp.this, "User Added Successfully!", Toast.LENGTH_SHORT).show();
-               startActivity(new Intent(SignUp.this, Home.class));
-               finish();
+
+               String uid = auth.getCurrentUser().getUid();
+               Map<String,Object> userData = new HashMap<>();
+               userData.put("name",nameText);
+               userData.put("email",emailText);
+               userData.put("mobile",mobileText);
+               userData.put("createAt", FieldValue.serverTimestamp());
+
+               FirebaseFirestore.getInstance().collection("users").document(uid).set(userData).addOnCompleteListener( saveTask -> {
+                   Toast.makeText(SignUp.this, "User Added Successfully!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(SignUp.this, Home.class));
+                     finish();
+
+               });
+
+//               Toast.makeText(SignUp.this, "User Added Successfully!", Toast.LENGTH_SHORT).show();
+//               startActivity(new Intent(SignUp.this, Home.class));
+//               finish();
                 }else {
-                     Toast.makeText(SignUp.this, "Registration Failed !", Toast.LENGTH_SHORT).show();
+                    String reason = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                    Toast.makeText(SignUp.this, "Registration Failed !" + reason, Toast.LENGTH_SHORT).show();
 
            }
             }
