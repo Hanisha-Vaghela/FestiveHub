@@ -109,6 +109,33 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
     }
 
     // Step 2: load those events
+//    private void loadEvents(Set<String> titles) {
+//        List<Task<QuerySnapshot>> queries = new ArrayList<>();
+//        for (String title : titles) {
+//            queries.add(db.collection("events").whereEqualTo("title", title).get());
+//        }
+//
+//        Tasks.whenAllSuccess(queries)
+//                .addOnSuccessListener(results -> {
+//                    events.clear();
+//                    Set<String> seen = new HashSet<>();
+//                    for (Object result : results) {
+//                        for (DocumentSnapshot doc : ((QuerySnapshot) result).getDocuments()) {
+//                            EventList event = doc.toObject(EventList.class);
+//                            if (event != null && seen.add(doc.getId())) {
+//                                events.add(event);
+//                            }
+//                        }
+//                    }
+//                    showResult();
+//                    for (EventList event : events) {
+//                        loadRegisteredCount(event.getId());
+//                    }
+//                })
+//                .addOnFailureListener(e -> showError(e.getMessage()));
+//    }
+
+    // Step 2: load those events
     private void loadEvents(Set<String> titles) {
         List<Task<QuerySnapshot>> queries = new ArrayList<>();
         for (String title : titles) {
@@ -123,13 +150,16 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
                         for (DocumentSnapshot doc : ((QuerySnapshot) result).getDocuments()) {
                             EventList event = doc.toObject(EventList.class);
                             if (event != null && seen.add(doc.getId())) {
+                                event.setId(doc.getId()); // <-- FIX: Attach Firestore Document ID
                                 events.add(event);
                             }
                         }
                     }
                     showResult();
                     for (EventList event : events) {
-                        loadRegisteredCount(event.getId());
+                        if (event.getId() != null) {
+                            loadRegisteredCount(event.getId());
+                        }
                     }
                 })
                 .addOnFailureListener(e -> showError(e.getMessage()));

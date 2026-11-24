@@ -140,11 +140,23 @@
 
             </LinearLayout>
 
+            <!-- NEW SCAN QR BUTTON -->
+            <Button
+                android:id="@+id/volunteer_event_details_btnScanQr"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="25dp"
+                android:backgroundTint="@color/green"
+                android:text="Scan Attendee QR"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
             <Button
                 android:id="@+id/volunteer_event_details_btnBack"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="12dp"
                 android:backgroundTint="#F1F3E7"
                 android:text="Back"
                 android:textAllCaps="false"
