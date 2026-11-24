@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FestiveHub">
         <activity
+            android:name=".VolunteerEventDetails"
+            android:exported="false" />
+        <activity
+            android:name=".VolunteerAssignedEvents"
+            android:exported="false" />
+        <activity
             android:name=".VolunteerHomeScreen"
             android:exported="false" />
         <activity
