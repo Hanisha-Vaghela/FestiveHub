@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F9F7"
+    android:fillViewport="true"
+    tools:context=".Profile">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/_20sdp">
+
+        <!-- Green header: avatar, name, email -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/_20sdp"
+            android:paddingTop="@dimen/_28sdp"
+            android:paddingBottom="@dimen/_20sdp">
+
+            <TextView
+                android:id="@+id/profile_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="‹ Back"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_13sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profile_avatar"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_70sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@drawable/circle_bg"
+                android:gravity="center"
+                android:text="H"
+                android:textColor="@color/green"
+                android:textSize="@dimen/_28sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profile_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="Name"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_16sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profile_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="email"
+                android:textColor="#E8F5E9"
+                android:textSize="@dimen/_11sdp" />
+        </LinearLayout>
+
+        <!-- Details card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_14sdp"
+            android:background="@drawable/edittext_bg"
+            android:orientation="vertical"
+            android:padding="@dimen/_14sdp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mobile number"
+                android:textColor="#777777"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/profile_mobile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Not added"
+                android:textColor="@color/black"
+                android:textSize="@dimen/_13sdp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:text="My Registered Events"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_14sdp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/profile_no_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:gravity="center"
+            android:text="You haven't registered for any events yet"
+            android:textColor="#777777"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/profile_rv_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_6sdp"
+            android:nestedScrollingEnabled="false"
+            android:paddingHorizontal="@dimen/_16sdp"
+            tools:listitem="@layout/item_registered_event" />
+
+        <Button
+            android:id="@+id/profile_btn_admin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:background="@drawable/edittext_bg"
+            android:text="Admin Panel"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            app:backgroundTint="@null" />
+
+        <Button
+            android:id="@+id/profile_btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:background="@drawable/button_bg"
+            android:text="Logout"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+</ScrollView>

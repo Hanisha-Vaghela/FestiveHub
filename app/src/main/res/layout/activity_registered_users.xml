@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RegisteredUsers">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/green"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/_20sdp"
+        android:paddingTop="@dimen/_28sdp"
+        android:paddingBottom="@dimen/_14sdp">
+
+        <TextView
+            android:id="@+id/reg_users_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹ Back"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_13sdp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:text="Registered Users"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_18sdp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/reg_users_event"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#E8F5E9"
+            android:textSize="@dimen/_12sdp" />
+
+        <TextView
+            android:id="@+id/reg_users_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_11sdp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/reg_users_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/_20sdp"
+        android:text="Nobody has registered for this event yet"
+        android:textColor="#777777"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reg_users_rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="@dimen/_16sdp"
+        android:paddingTop="@dimen/_6sdp"
+        android:paddingBottom="@dimen/_20sdp"
+        tools:listitem="@layout/item_registered_user" />
+</LinearLayout>

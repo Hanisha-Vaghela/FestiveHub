@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".Volunteers_QR">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Volunteer will scan only!"
+        android:textStyle="bold"
+        android:textSize="@dimen/_25sdp"/>
+    <ImageButton
+        android:id="@+id/volunteersQR"
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="@dimen/_300sdp"
+        android:contentDescription="volunteers QR code"
+        />
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="back"-->
+<!--        android:id="@+id/volunteer_qr_backbtn"-->
+<!--        android:layout_gravity="end"-->
+<!--        app:backgroundTint="@null"-->
+<!--        android:background="@drawable/button_bg"-->
+<!--        />-->
+</LinearLayout>
