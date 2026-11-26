@@ -4,30 +4,39 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class VolunteerHomeScreen extends AppCompatActivity {
 
     TextView tvWelcome, tvTotalEvents, tvJoinedEvents, tvNoEvents;
-    Button explorebtn, profileBtn;
+    LinearLayout emptyBox;
+    RecyclerView rvUpcoming;
+    Button btnScanAttendance, explorebtn, profileBtn;
+
     FirebaseFirestore db;
+    final ArrayList<EventList> upcomingEvents = new ArrayList<>();
+    final Map<String, Long> emptyCounts = new HashMap<>();
+    VolunteerAssignedEvents.EventsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,99 +47,110 @@ public class VolunteerHomeScreen extends AppCompatActivity {
         tvTotalEvents = findViewById(R.id.volunteer_home_screen_TotalEvents);
         tvJoinedEvents = findViewById(R.id.volunteer_home_screen_JoinedEvents);
         tvNoEvents = findViewById(R.id.volunteer_home_screen_NoEvents);
+        emptyBox = findViewById(R.id.volunteer_home_screen_EmptyBox);
+        rvUpcoming = findViewById(R.id.volunteer_home_screen_RecyclerView);
+        btnScanAttendance = findViewById(R.id.volunteer_home_screen_btnScanAttendance);
         explorebtn = findViewById(R.id.volunteer_home_screen_btnExploreEvents);
         profileBtn = findViewById(R.id.volunteer_home_screen_btnVolunteerProfile);
 
         db = FirebaseFirestore.getInstance();
+
+        adapter = new VolunteerAssignedEvents.EventsAdapter(upcomingEvents, emptyCounts, event -> {
+            Intent intent = new Intent(VolunteerHomeScreen.this, VolunteerEventDetails.class);
+            intent.putExtra("eventId", event.getId());
+            startActivity(intent);
+        });
+        rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
+        rvUpcoming.setAdapter(adapter);
+
+        btnScanAttendance.setOnClickListener(view ->
+                startActivity(new Intent(VolunteerHomeScreen.this, Volunteers_QR.class)));
 
         explorebtn.setOnClickListener(view ->
                 startActivity(new Intent(VolunteerHomeScreen.this, VolunteerAssignedEvents.class)));
 
         profileBtn.setOnClickListener(view ->
                 startActivity(new Intent(VolunteerHomeScreen.this, Profile.class)));
-
-        loadVolunteerDashboard();
     }
 
-    private void loadVolunteerDashboard() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        verifyRoleAndLoadDashboard();
+    }
+
+    private void verifyRoleAndLoadDashboard() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null || user.getEmail() == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, Login.class));
             finish();
             return;
         }
 
-        // Load total available events count
-        db.collection("events").get().addOnSuccessListener(snap ->
-                tvTotalEvents.setText(String.format(Locale.getDefault(), "%02d", snap.size())));
-
-        // Load volunteer profile & assigned events
-        db.collection("volunteers").whereEqualTo("email", user.getEmail()).get()
-                .addOnSuccessListener(snap -> {
-                    Set<String> titles = new LinkedHashSet<>();
-                    String volunteerName = null;
-
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        if (volunteerName == null) {
-                            volunteerName = doc.getString("name");
-                        }
-                        String assigned = doc.getString("assignedEvent");
-                        if (assigned != null && !assigned.trim().isEmpty()) {
-                            titles.add(assigned.trim());
-                        }
+        // Enforce role check so Normal Users cannot remain on VolunteerHomeScreen
+        db.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(userDoc -> {
+                    String role = userDoc.exists() ? userDoc.getString("role") : "";
+                    if (!"volunteer".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+                        Toast.makeText(this, "Unauthorized access", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, Home.class));
+                        finish();
+                        return;
                     }
-
-                    if (volunteerName != null && !volunteerName.isEmpty()) {
-                        tvWelcome.setText("Welcome, " + volunteerName + "!");
+                    String name = userDoc.getString("name");
+                    if (name != null && !name.isEmpty()) {
+                        tvWelcome.setText("Welcome, " + name + "!");
                     }
-
-                    tvJoinedEvents.setText(String.format(Locale.getDefault(), "%02d", titles.size()));
-
-                    if (titles.isEmpty()) {
-                        tvNoEvents.setText("No assigned events yet.");
-                    } else {
-                        loadFirstAssignedEventPreview(titles);
-                    }
-                })
-                .addOnFailureListener(e -> tvNoEvents.setText("Error loading assignments: " + e.getMessage()));
+                    loadEventsData(user.getEmail());
+                });
     }
 
-    private void loadFirstAssignedEventPreview(Set<String> titles) {
-        List<Task<QuerySnapshot>> queries = new ArrayList<>();
-        for (String title : titles) {
-            queries.add(db.collection("events").whereEqualTo("title", title).get());
-        }
+    private void loadEventsData(String email) {
+        String cleanEmail = email.trim();
+        String lowerEmail = cleanEmail.toLowerCase(Locale.ROOT);
 
-        Tasks.whenAllSuccess(queries).addOnSuccessListener(results -> {
-            StringBuilder summary = new StringBuilder();
-            String firstEventId = null;
+        db.collection("events").get().addOnSuccessListener(allEventsSnap -> {
+            tvTotalEvents.setText(String.format(Locale.getDefault(), "%02d", allEventsSnap.size()));
 
-            for (Object res : results) {
-                for (DocumentSnapshot doc : ((QuerySnapshot) res).getDocuments()) {
-                    if (firstEventId == null) {
-                        firstEventId = doc.getId();
-                    }
-                    String title = doc.getString("title");
-                    String dateLoc = doc.getString("dateAndLocation");
-                    summary.append("• ").append(title);
-                    if (dateLoc != null && !dateLoc.isEmpty()) {
-                        summary.append(" (").append(dateLoc).append(")");
-                    }
-                    summary.append("\n");
-                }
-            }
+            db.collection("volunteers")
+                    .whereIn("email", Arrays.asList(cleanEmail, lowerEmail))
+                    .get()
+                    .addOnSuccessListener(volSnap -> {
+                        Set<String> assignedTitles = new LinkedHashSet<>();
+                        for (DocumentSnapshot d : volSnap.getDocuments()) {
+                            String t = d.getString("assignedEvent");
+                            if (t != null && !t.trim().isEmpty()) {
+                                assignedTitles.add(t.trim().toLowerCase(Locale.ROOT));
+                            }
+                        }
 
-            if (summary.length() > 0) {
-                tvNoEvents.setText(summary.toString().trim() + "\n\n(Tap to view schedule & details)");
-                tvNoEvents.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
-                final String targetId = firstEventId;
-                tvNoEvents.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, VolunteerEventDetails.class);
-                    intent.putExtra("eventId", targetId);
-                    startActivity(intent);
-                });
-            }
+                        upcomingEvents.clear();
+                        Set<String> seenIds = new HashSet<>();
+
+                        for (DocumentSnapshot eventDoc : allEventsSnap.getDocuments()) {
+                            String title = eventDoc.getString("title");
+                            if (title != null
+                                    && assignedTitles.contains(title.trim().toLowerCase(Locale.ROOT))
+                                    && seenIds.add(eventDoc.getId())) {
+                                EventList event = eventDoc.toObject(EventList.class);
+                                if (event != null) {
+                                    event.setId(eventDoc.getId());
+                                    upcomingEvents.add(event);
+                                }
+                            }
+                        }
+
+                        tvJoinedEvents.setText(String.format(Locale.getDefault(), "%02d", upcomingEvents.size()));
+                        if (upcomingEvents.isEmpty()) {
+                            tvNoEvents.setText("No upcoming assigned events.");
+                            emptyBox.setVisibility(View.VISIBLE);
+                            rvUpcoming.setVisibility(View.GONE);
+                        } else {
+                            emptyBox.setVisibility(View.GONE);
+                            rvUpcoming.setVisibility(View.VISIBLE);
+                        }
+                        adapter.notifyDataSetChanged();
+                    });
         });
     }
 }

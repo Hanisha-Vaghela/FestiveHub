@@ -16,32 +16,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.AggregateSource;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Volunteer screen: the events assigned to the logged-in volunteer.
- *
- * How the assignment is found:
- *   volunteers collection  ->  records whose "email" is the volunteer's login email
- *   each record's "assignedEvent" (an event title)  ->  the matching events
- * (To assign several events, the admin adds one volunteer record per event with the same email.)
- */
 public class VolunteerAssignedEvents extends AppCompatActivity {
 
     TextView tvTotalAssigned, tvTotalRegistrations, tvNoEvents;
@@ -51,7 +40,7 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
 
     FirebaseFirestore db;
     final ArrayList<EventList> events = new ArrayList<>();
-    final Map<String, Long> counts = new HashMap<>(); // eventId -> number registered
+    final Map<String, Long> counts = new HashMap<>();
     EventsAdapter adapter;
 
     @Override
@@ -73,7 +62,15 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
         rvEvents.setAdapter(adapter);
 
         db = FirebaseFirestore.getInstance();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        verifyVolunteerAndLoad();
+    }
+
+    private void verifyVolunteerAndLoad() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null || user.getEmail() == null) {
             Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
@@ -81,80 +78,69 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
             return;
         }
 
-        tvNoEvents.setText("Loading your events...");
-        emptyLayout.setVisibility(View.VISIBLE);
-        rvEvents.setVisibility(View.GONE);
-
-        loadAssignedTitles(user.getEmail());
+        // Security check: prevent normal users from viewing volunteer screens
+        db.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(userDoc -> {
+                    String role = userDoc.exists() ? userDoc.getString("role") : "";
+                    if (!"volunteer".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+                        Toast.makeText(this, "Access denied: Volunteers only", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+                    tvNoEvents.setText("Loading your events...");
+                    emptyLayout.setVisibility(View.VISIBLE);
+                    rvEvents.setVisibility(View.GONE);
+                    loadAssignedTitles(user.getEmail());
+                })
+                .addOnFailureListener(e -> showError(e.getMessage()));
     }
 
-    // Step 1: which events (by title) did the admin assign to this email?
     private void loadAssignedTitles(String email) {
-        db.collection("volunteers").whereEqualTo("email", email).get()
+        String cleanEmail = email.trim();
+        String lowerEmail = cleanEmail.toLowerCase(Locale.ROOT);
+
+        db.collection("volunteers")
+                .whereIn("email", Arrays.asList(cleanEmail, lowerEmail))
+                .get()
                 .addOnSuccessListener(snapshot -> {
-                    Set<String> titles = new LinkedHashSet<>();
+                    Set<String> normalizedTitles = new LinkedHashSet<>();
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         String title = doc.getString("assignedEvent");
                         if (title != null && !title.trim().isEmpty()) {
-                            titles.add(title.trim());
+                            normalizedTitles.add(title.trim().toLowerCase(Locale.ROOT));
                         }
                     }
-                    if (titles.isEmpty()) {
+                    if (normalizedTitles.isEmpty()) {
+                        events.clear();
+                        counts.clear();
                         showResult();
                     } else {
-                        loadEvents(titles);
+                        loadAllMatchingEvents(normalizedTitles);
                     }
                 })
                 .addOnFailureListener(e -> showError(e.getMessage()));
     }
 
-    // Step 2: load those events
-//    private void loadEvents(Set<String> titles) {
-//        List<Task<QuerySnapshot>> queries = new ArrayList<>();
-//        for (String title : titles) {
-//            queries.add(db.collection("events").whereEqualTo("title", title).get());
-//        }
-//
-//        Tasks.whenAllSuccess(queries)
-//                .addOnSuccessListener(results -> {
-//                    events.clear();
-//                    Set<String> seen = new HashSet<>();
-//                    for (Object result : results) {
-//                        for (DocumentSnapshot doc : ((QuerySnapshot) result).getDocuments()) {
-//                            EventList event = doc.toObject(EventList.class);
-//                            if (event != null && seen.add(doc.getId())) {
-//                                events.add(event);
-//                            }
-//                        }
-//                    }
-//                    showResult();
-//                    for (EventList event : events) {
-//                        loadRegisteredCount(event.getId());
-//                    }
-//                })
-//                .addOnFailureListener(e -> showError(e.getMessage()));
-//    }
-
-    // Step 2: load those events
-    private void loadEvents(Set<String> titles) {
-        List<Task<QuerySnapshot>> queries = new ArrayList<>();
-        for (String title : titles) {
-            queries.add(db.collection("events").whereEqualTo("title", title).get());
-        }
-
-        Tasks.whenAllSuccess(queries)
-                .addOnSuccessListener(results -> {
+    private void loadAllMatchingEvents(Set<String> normalizedTitles) {
+        db.collection("events").get()
+                .addOnSuccessListener(snapshot -> {
                     events.clear();
-                    Set<String> seen = new HashSet<>();
-                    for (Object result : results) {
-                        for (DocumentSnapshot doc : ((QuerySnapshot) result).getDocuments()) {
+                    counts.clear();
+                    Set<String> seenIds = new HashSet<>();
+
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String eventTitle = doc.getString("title");
+                        if (eventTitle != null
+                                && normalizedTitles.contains(eventTitle.trim().toLowerCase(Locale.ROOT))
+                                && seenIds.add(doc.getId())) {
                             EventList event = doc.toObject(EventList.class);
-                            if (event != null && seen.add(doc.getId())) {
-                                event.setId(doc.getId()); // <-- FIX: Attach Firestore Document ID
+                            if (event != null) {
+                                event.setId(doc.getId()); // Critical fix: attach document ID
                                 events.add(event);
                             }
                         }
                     }
+
                     showResult();
                     for (EventList event : events) {
                         if (event.getId() != null) {
@@ -165,7 +151,6 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
                 .addOnFailureListener(e -> showError(e.getMessage()));
     }
 
-    // Step 3: how many people registered for each event
     private void loadRegisteredCount(String eventId) {
         db.collection("events").document(eventId).collection("registrations")
                 .count().get(AggregateSource.SERVER)
@@ -178,7 +163,6 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
                     }
                     tvTotalRegistrations.setText(String.format(Locale.getDefault(), "%02d", total));
                 });
-        // if this fails (for example missing permission) the row simply shows "Registered: --"
     }
 
     private void showResult() {
@@ -205,8 +189,6 @@ public class VolunteerAssignedEvents extends AppCompatActivity {
         intent.putExtra("eventId", event.getId());
         startActivity(intent);
     }
-
-    // ---------- list adapter (uses item_volunteer_assigned_event.xml) ----------
 
     static class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
 

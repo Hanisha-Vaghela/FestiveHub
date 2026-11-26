@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Event QR"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/user_qr_EventTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Event"
+        android:textColor="@color/green"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/user_qr_Image"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:layout_marginTop="20dp"
+        android:background="#FFFFFF"
+        android:contentDescription="Your QR code"
+        android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/user_qr_UserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="Show this QR to the volunteer at the entrance"
+        android:textColor="#777777"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/user_qr_btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#F1F3E7"
+        android:text="Back"
+        android:textAllCaps="false"
+        android:textColor="@color/green"
+        android:textSize="16sp" />
+
+</LinearLayout>

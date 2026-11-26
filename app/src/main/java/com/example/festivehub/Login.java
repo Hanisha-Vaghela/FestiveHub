@@ -77,7 +77,7 @@ public class Login extends AppCompatActivity {
                         login_btn.setEnabled(true);
                         return;
                     }
-                    routeUserByRole(user);
+                    checkRoleAndNavigate(user);
                 })
                 .addOnFailureListener(e -> {
                     login_btn.setEnabled(true);
@@ -85,42 +85,49 @@ public class Login extends AppCompatActivity {
                 });
     }
 
-    private void routeUserByRole(FirebaseUser user) {
+    private void checkRoleAndNavigate(FirebaseUser user) {
         db.collection("users").document(user.getUid()).get()
                 .addOnSuccessListener(doc -> {
                     String role = doc.exists() ? doc.getString("role") : null;
 
                     if ("admin".equalsIgnoreCase(role)) {
-                        goTo(Home.class, "Welcome Admin"); // admin dashboard nu home karyu
+                        navigateTo(Home.class, "Welcome Admin");
                     } else if ("volunteer".equalsIgnoreCase(role)) {
-                        goTo(VolunteerHomeScreen.class, "Welcome Volunteer");
+                        navigateTo(VolunteerHomeScreen.class, "Welcome Volunteer");
+                    } else if ("user".equalsIgnoreCase(role)) {
+                        navigateTo(Home.class, "Login Successful");
                     } else {
-                        // Fallback: check if admin added this email in the volunteers collection
-                        checkVolunteerCollectionFallback(user.getEmail());
+                        // Fallback if user doc was created before role field existed
+                        checkVolunteerFallback(user.getEmail());
                     }
                 })
-                .addOnFailureListener(e -> checkVolunteerCollectionFallback(user.getEmail()));
+                .addOnFailureListener(e -> {
+                    login_btn.setEnabled(true);
+                    Toast.makeText(this, "Error fetching user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void checkVolunteerCollectionFallback(String userEmail) {
+    private void checkVolunteerFallback(String userEmail) {
         if (userEmail == null) {
-            goTo(Home.class, "Login Successful");
+            navigateTo(Home.class, "Login Successful");
             return;
         }
-        db.collection("volunteers").whereEqualTo("email", userEmail).limit(1).get()
+        db.collection("volunteers").whereEqualTo("email", userEmail.toLowerCase()).limit(1).get()
                 .addOnSuccessListener(snap -> {
                     if (!snap.isEmpty()) {
-                        goTo(VolunteerHomeScreen.class, "Welcome Volunteer");
+                        navigateTo(VolunteerHomeScreen.class, "Welcome Volunteer");
                     } else {
-                        goTo(Home.class, "Login Successful");
+                        navigateTo(Home.class, "Login Successful");
                     }
                 })
-                .addOnFailureListener(e -> goTo(Home.class, "Login Successful"));
+                .addOnFailureListener(e -> navigateTo(Home.class, "Login Successful"));
     }
 
-    private void goTo(Class<?> targetActivity, String message) {
-        Toast.makeText(Login.this, message, Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(Login.this, targetActivity));
+    private void navigateTo(Class<?> target, String msg) {
+        Toast.makeText(Login.this, msg, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(Login.this, target);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 }

@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,6 +33,7 @@ public class Profile extends AppCompatActivity {
 
     ArrayList<EventList> registeredEvents = new ArrayList<>();
     RegisteredEventAdapter adapter;
+    String currentUserRole = "user";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +67,7 @@ public class Profile extends AppCompatActivity {
             goToLogin();
         });
 
-        adapter = new RegisteredEventAdapter(registeredEvents, event -> {
-            Intent intent = new Intent(Profile.this, Event_Detail.class);
-            intent.putExtra("eventId", event.getId());
-            startActivity(intent);
-        });
+        adapter = new RegisteredEventAdapter(registeredEvents, this::onRegisteredEventClicked);
         rvRegistered.setLayoutManager(new LinearLayoutManager(this));
         rvRegistered.setAdapter(adapter);
 
@@ -78,7 +76,32 @@ public class Profile extends AppCompatActivity {
         loadRegisteredEvents(user.getUid());
     }
 
-    // Shown immediately from the login account, replaced by saved details when they load
+    private void onRegisteredEventClicked(EventList event) {
+        if ("volunteer".equalsIgnoreCase(currentUserRole)) {
+            Intent intent = new Intent(Profile.this, Event_Detail.class);
+            intent.putExtra("eventId", event.getId());
+            startActivity(intent);
+            return;
+        }
+
+        String[] options = {"Show Entry QR Code", "View Event Details"};
+        new AlertDialog.Builder(this)
+                .setTitle(event.getTitle() != null ? event.getTitle() : "Registered Event")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        Intent qrIntent = new Intent(Profile.this, UserQR.class);
+                        qrIntent.putExtra("eventId", event.getId());
+                        qrIntent.putExtra("eventTitle", event.getTitle());
+                        startActivity(qrIntent);
+                    } else {
+                        Intent detailIntent = new Intent(Profile.this, Event_Detail.class);
+                        detailIntent.putExtra("eventId", event.getId());
+                        startActivity(detailIntent);
+                    }
+                })
+                .show();
+    }
+
     private void showBasicInfo(FirebaseUser user) {
         String email = user.getEmail() != null ? user.getEmail() : "";
         tvEmail.setText(email);
@@ -98,9 +121,17 @@ public class Profile extends AppCompatActivity {
             }
             String name = doc.getString("name");
             String mobile = doc.getString("mobile");
-            // Admin Panel is only for users whose document has role = "admin"
-            if ("admin".equals(doc.getString("role"))) {
+            String role = doc.getString("role");
+            if (role != null && !role.isEmpty()) {
+                currentUserRole = role;
+            }
+
+            if ("admin".equalsIgnoreCase(currentUserRole)) {
                 btnAdmin.setVisibility(View.VISIBLE);
+            }
+            if ("volunteer".equalsIgnoreCase(currentUserRole)) {
+                rvRegistered.setVisibility(View.GONE);
+                tvNoEvents.setVisibility(View.GONE);
             }
             if (name != null && !name.isEmpty()) {
                 setName(name);
@@ -122,14 +153,17 @@ public class Profile extends AppCompatActivity {
                     registeredEvents.clear();
                     if (snapshots != null) {
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
-                            EventList event = doc.toObject(EventList.class); // doc id = eventId
+                            EventList event = doc.toObject(EventList.class);
                             if (event != null) {
+                                event.setId(doc.getId());
                                 registeredEvents.add(event);
                             }
                         }
                     }
                     adapter.notifyDataSetChanged();
-                    tvNoEvents.setVisibility(registeredEvents.isEmpty() ? View.VISIBLE : View.GONE);
+                    if (!"volunteer".equalsIgnoreCase(currentUserRole)) {
+                        tvNoEvents.setVisibility(registeredEvents.isEmpty() ? View.VISIBLE : View.GONE);
+                    }
                 });
     }
 

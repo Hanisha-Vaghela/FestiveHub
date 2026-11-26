@@ -63,7 +63,7 @@ public class AdminEntity {
                 "name", "assignedEvent", "mobile").with(
                 AdminField.text("name", "Full name", true),
                 AdminField.phone("mobile", "Mobile number", true),
-                AdminField.email("email", "Email", false),
+                AdminField.email("email", "Email (volunteer login email)", true),
                 AdminField.choiceFromCollection("assignedEvent", "Assigned event", false, "events", "title")));
 
         add(new AdminEntity("colleges", "College List", "College", "colleges",

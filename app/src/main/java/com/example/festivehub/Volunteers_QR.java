@@ -13,6 +13,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,7 +29,8 @@ import java.util.Map;
 public class Volunteers_QR extends AppCompatActivity {
 
     private FirebaseFirestore db;
-    private String expectedEventId; // Optional: passed if opened from a specific event
+    private String expectedEventId;
+    private String volunteerUid;
     private TextView tvStatus;
     private Button btnScanAgain, btnBack;
 
@@ -45,7 +48,7 @@ public class Volunteers_QR extends AppCompatActivity {
             registerForActivityResult(new ScanContract(), result -> {
                 if (result.getContents() == null) {
                     if (tvStatus != null) {
-                        tvStatus.setText("Scan cancelled. Tap 'Scan QR' to try again.");
+                        tvStatus.setText("Scan cancelled. Tap 'Scan QR Code' to try again.");
                     }
                 } else {
                     handleScannedData(result.getContents().trim());
@@ -60,7 +63,6 @@ public class Volunteers_QR extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         expectedEventId = getIntent().getStringExtra("eventId");
 
-        // Bind views if present in activity_volunteers_qr.xml
         tvStatus = findViewById(R.id.tv_qr_status);
         btnScanAgain = findViewById(R.id.btn_scan_qr);
         btnBack = findViewById(R.id.btn_qr_back);
@@ -72,7 +74,28 @@ public class Volunteers_QR extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        checkCameraAndScan();
+        verifyVolunteerBeforeScanning();
+    }
+
+    private void verifyVolunteerBeforeScanning() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            finish();
+            return;
+        }
+        volunteerUid = user.getUid();
+
+        db.collection("users").document(volunteerUid).get()
+                .addOnSuccessListener(doc -> {
+                    String role = doc.exists() ? doc.getString("role") : "";
+                    if (!"volunteer".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+                        Toast.makeText(this, "Access denied: Only volunteers can scan attendance", Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
+                    checkCameraAndScan();
+                })
+                .addOnFailureListener(e -> finish());
     }
 
     private void checkCameraAndScan() {
@@ -99,60 +122,49 @@ public class Volunteers_QR extends AppCompatActivity {
 
         try {
             if (rawData.startsWith("{")) {
-                // Case 1: JSON QR e.g. {"eventId":"...","uid":"..."}
                 JSONObject json = new JSONObject(rawData);
                 if (json.has("eventId")) eventId = json.getString("eventId");
                 if (json.has("uid")) uid = json.getString("uid");
-                else if (json.has("userId")) uid = json.getString("userId");
             } else if (rawData.contains("|")) {
-                // Case 2: Pipe-separated QR e.g. "eventId|uid"
                 String[] parts = rawData.split("\\|");
                 if (parts.length >= 2) {
                     eventId = parts[0].trim();
                     uid = parts[1].trim();
                 }
-            } else if (rawData.contains(":")) {
-                // Case 3: Colon-separated QR e.g. "eventId:uid"
-                String[] parts = rawData.split(":");
-                if (parts.length >= 2) {
-                    eventId = parts[0].trim();
-                    uid = parts[1].trim();
-                }
             } else {
-                // Case 4: QR contains only the user's UID
                 uid = rawData;
             }
         } catch (Exception e) {
-            showResultDialog("Invalid QR", "Could not read QR format: " + rawData, false);
+            showResultDialog("Invalid QR", "Could not read QR code format.");
             return;
         }
 
         if (eventId == null || eventId.isEmpty() || uid == null || uid.isEmpty()) {
-            showResultDialog("Invalid Ticket", "Missing event or user ID in QR code.", false);
+            showResultDialog("Invalid QR Code", "QR code is missing event or user registration details.");
             return;
         }
 
         if (expectedEventId != null && !expectedEventId.equals(eventId)) {
-            showResultDialog("Wrong Event", "This ticket belongs to a different event!", false);
+            showResultDialog("Wrong Event", "This QR code is registered for a different event.");
             return;
         }
 
-        verifyAndCheckIn(eventId, uid);
+        markAttendanceInFirestore(eventId, uid);
     }
 
-    private void verifyAndCheckIn(String eventId, String uid) {
+    private void markAttendanceInFirestore(String eventId, String attendeeUid) {
         if (tvStatus != null) {
-            tvStatus.setText("Verifying ticket...");
+            tvStatus.setText("Verifying registration...");
         }
 
         DocumentReference regRef = db.collection("events")
                 .document(eventId)
                 .collection("registrations")
-                .document(uid);
+                .document(attendeeUid);
 
         regRef.get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {
-                showResultDialog("Not Registered", "No registration found for this user.", false);
+                showResultDialog("Not Registered", "This user is not registered for this event.");
                 return;
             }
 
@@ -162,29 +174,30 @@ public class Volunteers_QR extends AppCompatActivity {
                 attendeeName = doc.getString("email");
             }
             if (attendeeName == null) {
-                attendeeName = uid;
+                attendeeName = attendeeUid;
             }
 
             if (Boolean.TRUE.equals(alreadyCheckedIn)) {
-                showResultDialog("Already Checked In", attendeeName + " has already entered!", false);
+                showResultDialog("Duplicate Attendance", attendeeName + " is already marked present!");
                 return;
             }
 
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("checkedIn", true);
-            updates.put("checkedInAt", FieldValue.serverTimestamp());
+            Map<String, Object> attendanceData = new HashMap<>();
+            attendanceData.put("checkedIn", true);
+            attendanceData.put("checkedInAt", FieldValue.serverTimestamp());
+            attendanceData.put("checkedInBy", volunteerUid);
 
             final String displayName = attendeeName;
-            regRef.update(updates)
+            regRef.update(attendanceData)
                     .addOnSuccessListener(unused ->
-                            showResultDialog("Check-In Successful", "Welcome, " + displayName + "!", true))
+                            showResultDialog("Attendance Marked", "Attendance marked successfully for " + displayName + "!"))
                     .addOnFailureListener(e ->
-                            showResultDialog("Check-In Failed", e.getMessage(), false));
+                            showResultDialog("Permission / Save Error", "Failed to mark attendance: " + e.getMessage()));
         }).addOnFailureListener(e ->
-                showResultDialog("Verification Error", e.getMessage(), false));
+                showResultDialog("Verification Failed", e.getMessage()));
     }
 
-    private void showResultDialog(String title, String message, boolean success) {
+    private void showResultDialog(String title, String message) {
         if (tvStatus != null) {
             tvStatus.setText(title + "\n" + message);
         }

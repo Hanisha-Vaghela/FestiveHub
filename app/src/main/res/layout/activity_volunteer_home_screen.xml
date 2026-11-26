@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -13,167 +12,181 @@
         android:layout_height="match_parent"
         android:fillViewport="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="FestiveHub"
-            android:textColor="@color/green"
-            android:textSize="25sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/volunteer_home_screen_Welcome"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="Welcome, Volunteer!"
-            android:textColor="@color/black"
-            android:textSize="23sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Be a part of something meaningful."
-            android:textColor="#777777"
-            android:textSize="15sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="My Dashboard"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="15dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="115dp"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#F1F3E7"
-                android:padding="10dp">
-
-                <TextView
-                    android:id="@+id/volunteer_home_screen_TotalEvents"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="00"
-                    android:textColor="@color/green"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Total Events"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="12dp"
-                android:layout_height="1dp" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="115dp"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#F1F3E7"
-                android:padding="10dp">
-
-                <TextView
-                    android:id="@+id/volunteer_home_screen_JoinedEvents"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="00"
-                    android:textColor="@color/green"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Joined Events"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="Upcoming Events"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-<!--        android:id="@+id/layoutUpcomingEvents"-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
             android:orientation="vertical"
-            android:background="#F8F9F4"
-            android:padding="15dp">
+            android:padding="20dp">
 
             <TextView
-                android:id="@+id/volunteer_home_screen_NoEvents"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FestiveHub"
+                android:textColor="@color/green"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/volunteer_home_screen_Welcome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No upcoming events available."
+                android:layout_marginTop="25dp"
+                android:text="Welcome, Volunteer!"
+                android:textColor="@color/black"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Be a part of something meaningful."
                 android:textColor="#777777"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:padding="20dp" />
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="My Dashboard"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:background="#F1F3E7"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/volunteer_home_screen_TotalEvents"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00"
+                        android:textColor="@color/green"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Events"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="1dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:background="#F1F3E7"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/volunteer_home_screen_JoinedEvents"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00"
+                        android:textColor="@color/green"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Assigned Events"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Upcoming Events"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/volunteer_home_screen_EmptyBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="#F8F9F4"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <TextView
+                    android:id="@+id/volunteer_home_screen_NoEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:text="No upcoming events available."
+                    android:textColor="#777777"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/volunteer_home_screen_RecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"
+                tools:listitem="@layout/item_volunteer_assigned_event" />
+
+            <Button
+                android:id="@+id/volunteer_home_screen_btnScanAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="25dp"
+                android:backgroundTint="@color/green"
+                android:text="Scan Attendance"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/volunteer_home_screen_btnExploreEvents"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#F1F3E7"
+                android:text="Explore Events"
+                android:textAllCaps="false"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/volunteer_home_screen_btnVolunteerProfile"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#F1F3E7"
+                android:text="My Profile"
+                android:textAllCaps="false"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/volunteer_home_screen_btnExploreEvents"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="25dp"
-            android:text="Explore Events"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/green" />
-
-        <Button
-            android:id="@+id/volunteer_home_screen_btnVolunteerProfile"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="10dp"
-            android:text="My Profile"
-            android:textColor="@color/green"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:backgroundTint="#F1F3E7" />
-
-    </LinearLayout>
     </ScrollView>
-
 </LinearLayout>
-

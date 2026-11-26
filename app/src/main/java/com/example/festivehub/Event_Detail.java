@@ -32,6 +32,7 @@ public class Event_Detail extends AppCompatActivity {
     String eventId;
     EventList currentEvent;
     boolean registered = false;
+    boolean isVolunteer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +65,67 @@ public class Event_Detail extends AppCompatActivity {
 
         btnConfirmBooking.setOnClickListener(v -> toggleRegistration());
 
+        loadRole();
+
         btnvolunteerqr.setOnClickListener(v -> {
-            Intent intent = new Intent(Event_Detail.this, Volunteers_QR.class);
-            intent.putExtra("eventId", eventId);
-            startActivity(intent);
+            if (isVolunteer) {
+                // volunteer -> scanner
+                Intent intent = new Intent(Event_Detail.this, VolunteerScanner.class);
+                intent.putExtra("eventId", eventId);
+                startActivity(intent);
+            } else {
+                // normal user -> my QR for this event
+                if (auth.getCurrentUser() == null) {
+                    Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!registered) {
+                    Toast.makeText(this, "Register for this event first to get your QR", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent intent = new Intent(Event_Detail.this, UserQR.class);
+                intent.putExtra("eventId", eventId);
+                startActivity(intent);
+            }
         });
 
         btnBackToHome.setOnClickListener(v -> finish());
+    }
+
+    // Volunteer = users/{uid}.role is "volunteer" OR the email is in the volunteers list.
+    // Volunteer -> button text becomes "Scan User QR". Everyone else -> button stays as it is.
+    private void loadRole() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+        db.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    String role = doc.getString("role");
+                    if ("volunteer".equalsIgnoreCase(role)) {
+                        makeVolunteer();
+                    } else {
+                        checkVolunteerList(user.getEmail());
+                    }
+                })
+                .addOnFailureListener(e -> checkVolunteerList(user.getEmail()));
+    }
+
+    private void checkVolunteerList(String email) {
+        if (email == null) {
+            return;
+        }
+        db.collection("volunteers").whereEqualTo("email", email).limit(1).get()
+                .addOnSuccessListener(snap -> {
+                    if (!snap.isEmpty()) {
+                        makeVolunteer();
+                    }
+                });
+    }
+
+    private void makeVolunteer() {
+        isVolunteer = true;
+        btnvolunteerqr.setText("Scan User QR");
     }
 
     private void loadEvent() {
