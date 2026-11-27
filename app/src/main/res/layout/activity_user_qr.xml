@@ -2,9 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="24dp"
+    tools:context=".UserQR">
 
     <TextView
         android:layout_width="wrap_content"
@@ -40,6 +42,16 @@
         android:layout_marginTop="14dp"
         android:textColor="@color/black"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/user_qr_StatusBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Status: Not Checked In"
+        android:textColor="@color/green"
+        android:textSize="13sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"

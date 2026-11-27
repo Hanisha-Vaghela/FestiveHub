@@ -1,8 +1,10 @@
 package com.example.festivehub;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-/** Small cards for "My Registered Events" on the Profile screen. */
 public class RegisteredEventAdapter extends RecyclerView.Adapter<RegisteredEventAdapter.ViewHolder> {
 
     public interface OnEventClickListener {
@@ -40,11 +41,21 @@ public class RegisteredEventAdapter extends RecyclerView.Adapter<RegisteredEvent
         holder.tvCategory.setText(event.getCategory());
         holder.tvTitle.setText(event.getTitle());
         holder.tvDate.setText(event.getDateAndLocation());
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onEventClick(event);
             }
         });
+
+        if (holder.btnViewQr != null) {
+            holder.btnViewQr.setOnClickListener(v -> {
+                Intent qrIntent = new Intent(v.getContext(), UserQR.class);
+                qrIntent.putExtra("eventId", event.getId());
+                qrIntent.putExtra("eventTitle", event.getTitle());
+                v.getContext().startActivity(qrIntent);
+            });
+        }
     }
 
     @Override
@@ -55,6 +66,7 @@ public class RegisteredEventAdapter extends RecyclerView.Adapter<RegisteredEvent
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivImage;
         TextView tvCategory, tvTitle, tvDate;
+        Button btnViewQr;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -62,6 +74,7 @@ public class RegisteredEventAdapter extends RecyclerView.Adapter<RegisteredEvent
             tvCategory = itemView.findViewById(R.id.reg_category);
             tvTitle = itemView.findViewById(R.id.reg_title);
             tvDate = itemView.findViewById(R.id.reg_date);
+            btnViewQr = itemView.findViewById(R.id.reg_btn_qr);
         }
     }
 }

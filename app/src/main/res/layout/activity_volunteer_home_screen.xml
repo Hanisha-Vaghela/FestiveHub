@@ -166,6 +166,17 @@
                 android:textSize="16sp" />
 
             <Button
+                android:id="@+id/volunteer_home_screen_btnAttendanceRecords"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#E8F5E9"
+                android:text="Attendance Records"
+                android:textAllCaps="false"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <Button
                 android:id="@+id/volunteer_home_screen_btnExploreEvents"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"

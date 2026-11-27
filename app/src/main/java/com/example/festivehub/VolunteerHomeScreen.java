@@ -31,7 +31,7 @@ public class VolunteerHomeScreen extends AppCompatActivity {
     TextView tvWelcome, tvTotalEvents, tvJoinedEvents, tvNoEvents;
     LinearLayout emptyBox;
     RecyclerView rvUpcoming;
-    Button btnScanAttendance, explorebtn, profileBtn;
+    Button btnScanAttendance, btnAttendanceRecords, explorebtn, profileBtn;
 
     FirebaseFirestore db;
     final ArrayList<EventList> upcomingEvents = new ArrayList<>();
@@ -50,6 +50,7 @@ public class VolunteerHomeScreen extends AppCompatActivity {
         emptyBox = findViewById(R.id.volunteer_home_screen_EmptyBox);
         rvUpcoming = findViewById(R.id.volunteer_home_screen_RecyclerView);
         btnScanAttendance = findViewById(R.id.volunteer_home_screen_btnScanAttendance);
+        btnAttendanceRecords = findViewById(R.id.volunteer_home_screen_btnAttendanceRecords);
         explorebtn = findViewById(R.id.volunteer_home_screen_btnExploreEvents);
         profileBtn = findViewById(R.id.volunteer_home_screen_btnVolunteerProfile);
 
@@ -63,12 +64,19 @@ public class VolunteerHomeScreen extends AppCompatActivity {
         rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
         rvUpcoming.setAdapter(adapter);
 
+        // 1. Open QR Scanner
         btnScanAttendance.setOnClickListener(view ->
                 startActivity(new Intent(VolunteerHomeScreen.this, Volunteers_QR.class)));
 
+        // 2. Open Attendance Records
+        btnAttendanceRecords.setOnClickListener(view ->
+                startActivity(new Intent(VolunteerHomeScreen.this, AttendanceRecordsActivity.class)));
+
+        // 3. Open Assigned Events
         explorebtn.setOnClickListener(view ->
                 startActivity(new Intent(VolunteerHomeScreen.this, VolunteerAssignedEvents.class)));
 
+        // 4. Open Profile
         profileBtn.setOnClickListener(view ->
                 startActivity(new Intent(VolunteerHomeScreen.this, Profile.class)));
     }
@@ -87,7 +95,6 @@ public class VolunteerHomeScreen extends AppCompatActivity {
             return;
         }
 
-        // Enforce role check so Normal Users cannot remain on VolunteerHomeScreen
         db.collection("users").document(user.getUid()).get()
                 .addOnSuccessListener(userDoc -> {
                     String role = userDoc.exists() ? userDoc.getString("role") : "";

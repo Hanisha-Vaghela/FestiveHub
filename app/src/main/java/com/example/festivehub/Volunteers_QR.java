@@ -1,6 +1,7 @@
 package com.example.festivehub;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,23 +17,37 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Volunteers_QR extends AppCompatActivity {
 
+    private static final String RESULT_SUCCESS = "SUCCESS";
+    private static final String RESULT_DUPLICATE = "DUPLICATE";
+    private static final String RESULT_NOT_REGISTERED = "NOT_REGISTERED";
+    private static final String RESULT_BAD_TOKEN = "BAD_TOKEN";
+
     private FirebaseFirestore db;
     private String expectedEventId;
     private String volunteerUid;
+    private String volunteerEmail;
+    private String currentUserRole = "";
+
     private TextView tvStatus;
-    private Button btnScanAgain, btnBack;
+    private Button btnScanAgain, btnViewAttendance, btnBack;
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -65,10 +80,20 @@ public class Volunteers_QR extends AppCompatActivity {
 
         tvStatus = findViewById(R.id.tv_qr_status);
         btnScanAgain = findViewById(R.id.btn_scan_qr);
+        btnViewAttendance = findViewById(R.id.btn_view_attendance);
         btnBack = findViewById(R.id.btn_qr_back);
 
         if (btnScanAgain != null) {
             btnScanAgain.setOnClickListener(v -> checkCameraAndScan());
+        }
+        if (btnViewAttendance != null) {
+            btnViewAttendance.setOnClickListener(v -> {
+                Intent intent = new Intent(Volunteers_QR.this, AttendanceRecordsActivity.class);
+                if (expectedEventId != null) {
+                    intent.putExtra("eventId", expectedEventId);
+                }
+                startActivity(intent);
+            });
         }
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
@@ -84,11 +109,12 @@ public class Volunteers_QR extends AppCompatActivity {
             return;
         }
         volunteerUid = user.getUid();
+        volunteerEmail = user.getEmail() != null ? user.getEmail().trim() : "";
 
         db.collection("users").document(volunteerUid).get()
                 .addOnSuccessListener(doc -> {
-                    String role = doc.exists() ? doc.getString("role") : "";
-                    if (!"volunteer".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+                    currentUserRole = doc.exists() ? doc.getString("role") : "";
+                    if (!"volunteer".equalsIgnoreCase(currentUserRole) && !"admin".equalsIgnoreCase(currentUserRole)) {
                         Toast.makeText(this, "Access denied: Only volunteers can scan attendance", Toast.LENGTH_LONG).show();
                         finish();
                         return;
@@ -117,84 +143,180 @@ public class Volunteers_QR extends AppCompatActivity {
     }
 
     private void handleScannedData(String rawData) {
-        String eventId = expectedEventId;
-        String uid = null;
-
         try {
-            if (rawData.startsWith("{")) {
-                JSONObject json = new JSONObject(rawData);
-                if (json.has("eventId")) eventId = json.getString("eventId");
-                if (json.has("uid")) uid = json.getString("uid");
-            } else if (rawData.contains("|")) {
-                String[] parts = rawData.split("\\|");
-                if (parts.length >= 2) {
-                    eventId = parts[0].trim();
-                    uid = parts[1].trim();
-                }
-            } else {
-                uid = rawData;
+            if (!rawData.startsWith("{")) {
+                showResultDialog("Invalid QR Code", "Unrecognized QR code format.");
+                return;
             }
+
+            JSONObject json = new JSONObject(rawData);
+            String regId = json.optString("regId", "").trim();
+            String eventId = json.optString("eventId", "").trim();
+            String token = json.optString("token", "").trim();
+
+            if (regId.isEmpty() || eventId.isEmpty() || token.isEmpty() || !regId.startsWith(eventId + "_")) {
+                showResultDialog("Invalid QR Code", "QR code is missing valid registration identifiers.");
+                return;
+            }
+
+            if (expectedEventId != null && !expectedEventId.isEmpty() && !expectedEventId.equals(eventId)) {
+                showResultDialog("Wrong Event", "This QR code belongs to a different event.");
+                return;
+            }
+
+            String attendeeUid = regId.substring((eventId + "_").length());
+            if (attendeeUid.isEmpty() || attendeeUid.contains("/") || eventId.contains("/")) {
+                showResultDialog("Invalid QR Code", "Invalid attendee identifier in QR code.");
+                return;
+            }
+
+            verifyVolunteerAssignmentAndRecord(eventId, attendeeUid, regId, token);
+
         } catch (Exception e) {
-            showResultDialog("Invalid QR", "Could not read QR code format.");
-            return;
+            showResultDialog("Invalid QR Code", "Could not parse QR code data.");
         }
-
-        if (eventId == null || eventId.isEmpty() || uid == null || uid.isEmpty()) {
-            showResultDialog("Invalid QR Code", "QR code is missing event or user registration details.");
-            return;
-        }
-
-        if (expectedEventId != null && !expectedEventId.equals(eventId)) {
-            showResultDialog("Wrong Event", "This QR code is registered for a different event.");
-            return;
-        }
-
-        markAttendanceInFirestore(eventId, uid);
     }
 
-    private void markAttendanceInFirestore(String eventId, String attendeeUid) {
+    private void verifyVolunteerAssignmentAndRecord(String eventId, String attendeeUid, String regId, String scannedToken) {
         if (tvStatus != null) {
-            tvStatus.setText("Verifying registration...");
+            tvStatus.setText("Validating volunteer assignment & ticket...");
         }
 
-        DocumentReference regRef = db.collection("events")
-                .document(eventId)
-                .collection("registrations")
-                .document(attendeeUid);
+        // Fetch event first to get eventName and verify volunteer assignment
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    if (!eventDoc.exists()) {
+                        showResultDialog("Invalid Event", "The event associated with this QR code does not exist.");
+                        return;
+                    }
 
-        regRef.get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) {
-                showResultDialog("Not Registered", "This user is not registered for this event.");
+                    String eventTitle = eventDoc.getString("title");
+                    final String safeEventTitle = (eventTitle != null && !eventTitle.isEmpty()) ? eventTitle : "Event";
+
+                    if ("admin".equalsIgnoreCase(currentUserRole)) {
+                        executeAtomicAttendanceTransaction(eventId, safeEventTitle, attendeeUid, regId, scannedToken);
+                        return;
+                    }
+
+                    // Verify that the scanning volunteer is assigned to this event
+                    String lowerEmail = volunteerEmail.toLowerCase(Locale.ROOT);
+                    db.collection("volunteers")
+                            .whereIn("email", Arrays.asList(volunteerEmail, lowerEmail))
+                            .get()
+                            .addOnSuccessListener(volSnap -> {
+                                boolean isAssigned = false;
+                                for (DocumentSnapshot vDoc : volSnap.getDocuments()) {
+                                    String assignedTitle = vDoc.getString("assignedEvent");
+                                    if (assignedTitle != null
+                                            && assignedTitle.trim().equalsIgnoreCase(safeEventTitle.trim())) {
+                                        isAssigned = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!isAssigned) {
+                                    showResultDialog("Unauthorized Event",
+                                            "You are not assigned as a volunteer for \"" + safeEventTitle + "\".");
+                                    return;
+                                }
+
+                                executeAtomicAttendanceTransaction(eventId, safeEventTitle, attendeeUid, regId, scannedToken);
+                            })
+                            .addOnFailureListener(e ->
+                                    showResultDialog("Verification Error", "Could not verify volunteer assignment: " + e.getMessage()));
+                })
+                .addOnFailureListener(e ->
+                        showResultDialog("Network Error", "Could not load event details: " + e.getMessage()));
+    }
+
+    private void executeAtomicAttendanceTransaction(String eventId, String eventName,
+                                                    String attendeeUid, String regId, String scannedToken) {
+        final String attendanceId = eventId + "_" + attendeeUid;
+        final DocumentReference regRef = db.collection("events").document(eventId)
+                .collection("registrations").document(attendeeUid);
+        final DocumentReference attendanceRef = db.collection("attendance").document(attendanceId);
+
+        Date now = new Date();
+        final String checkInDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(now);
+        final String checkInTime = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now);
+
+        // The transaction returns {result, attendee name}. Real Firestore errors
+        // (rules, network) go to the failure listener, so they are not shown as "Invalid QR".
+        db.runTransaction(transaction -> {
+            DocumentSnapshot regSnap = transaction.get(regRef);
+            if (!regSnap.exists()) {
+                return new String[]{RESULT_NOT_REGISTERED, ""};
+            }
+
+            String storedToken = regSnap.getString("qrToken");
+            if (storedToken == null || !storedToken.equals(scannedToken)) {
+                return new String[]{RESULT_BAD_TOKEN, ""};
+            }
+
+            DocumentSnapshot attSnap = transaction.get(attendanceRef);
+            Boolean alreadyCheckedIn = regSnap.getBoolean("checkedIn");
+
+            String userName = regSnap.getString("name");
+            if (userName == null || userName.trim().isEmpty()) {
+                userName = regSnap.getString("email");
+            }
+            if (userName == null || userName.trim().isEmpty()) {
+                userName = attendeeUid;
+            }
+
+            if (attSnap.exists() || Boolean.TRUE.equals(alreadyCheckedIn)) {
+                return new String[]{RESULT_DUPLICATE, userName};
+            }
+
+            Map<String, Object> record = new HashMap<>();
+            record.put("attendanceId", attendanceId);
+            record.put("userId", attendeeUid);
+            record.put("userName", userName);
+            record.put("eventId", eventId);
+            record.put("eventName", eventName);
+            record.put("registrationId", regId);
+            record.put("volunteerId", volunteerUid);
+            record.put("attendanceStatus", "Present");
+            record.put("checkInDate", checkInDate);
+            record.put("checkInTime", checkInTime);
+            record.put("timestamp", FieldValue.serverTimestamp());
+
+            transaction.set(attendanceRef, record);
+            transaction.update(regRef,
+                    "checkedIn", true,
+                    "checkedInAt", FieldValue.serverTimestamp(),
+                    "checkedInBy", volunteerUid);
+
+            return new String[]{RESULT_SUCCESS, userName};
+        }).addOnSuccessListener(result -> {
+            switch (result[0]) {
+                case RESULT_SUCCESS:
+                    showResultDialog("Attendance Marked",
+                            "Valid QR Code\nPresent: " + result[1] + "\nEvent: " + eventName
+                                    + "\nTime: " + checkInDate + " at " + checkInTime);
+                    break;
+                case RESULT_DUPLICATE:
+                    showResultDialog("Already Scanned", "Attendance already marked for " + result[1] + "!");
+                    break;
+                case RESULT_NOT_REGISTERED:
+                    showResultDialog("Not Registered", "User is not registered for this event.");
+                    break;
+                default:
+                    showResultDialog("Invalid QR Code",
+                            "This QR does not match the current registration. Ask the user to reopen their QR.");
+                    break;
+            }
+        }).addOnFailureListener(e -> {
+            if (e instanceof FirebaseFirestoreException
+                    && ((FirebaseFirestoreException) e).getCode()
+                    == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
+                showResultDialog("Permission Denied",
+                        "Firestore rules blocked this check-in. Check the published rules and your account role.");
                 return;
             }
-
-            Boolean alreadyCheckedIn = doc.getBoolean("checkedIn");
-            String attendeeName = doc.getString("name");
-            if (attendeeName == null || attendeeName.isEmpty()) {
-                attendeeName = doc.getString("email");
-            }
-            if (attendeeName == null) {
-                attendeeName = attendeeUid;
-            }
-
-            if (Boolean.TRUE.equals(alreadyCheckedIn)) {
-                showResultDialog("Duplicate Attendance", attendeeName + " is already marked present!");
-                return;
-            }
-
-            Map<String, Object> attendanceData = new HashMap<>();
-            attendanceData.put("checkedIn", true);
-            attendanceData.put("checkedInAt", FieldValue.serverTimestamp());
-            attendanceData.put("checkedInBy", volunteerUid);
-
-            final String displayName = attendeeName;
-            regRef.update(attendanceData)
-                    .addOnSuccessListener(unused ->
-                            showResultDialog("Attendance Marked", "Attendance marked successfully for " + displayName + "!"))
-                    .addOnFailureListener(e ->
-                            showResultDialog("Permission / Save Error", "Failed to mark attendance: " + e.getMessage()));
-        }).addOnFailureListener(e ->
-                showResultDialog("Verification Failed", e.getMessage()));
+            showResultDialog("Check-In Failed",
+                    e.getMessage() != null ? e.getMessage() : "Attendance failed");
+        });
     }
 
     private void showResultDialog(String title, String message) {

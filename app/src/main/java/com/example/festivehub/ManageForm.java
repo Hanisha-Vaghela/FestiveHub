@@ -315,6 +315,10 @@ public class ManageForm extends AppCompatActivity {
                     et.requestFocus();
                     return;
                 }
+                // Firebase Auth emails are lowercase, so save volunteer emails the same way
+                if (f.type == AdminField.Type.EMAIL && entity.key.equals("volunteers")) {
+                    text = text.toLowerCase(java.util.Locale.ROOT);
+                }
                 if (f.type == AdminField.Type.NUMBER) {
                     try {
                         data.put(f.key, Integer.parseInt(text));

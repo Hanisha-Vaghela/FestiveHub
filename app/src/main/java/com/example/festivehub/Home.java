@@ -100,7 +100,6 @@ public class Home extends AppCompatActivity {
 
         ivProfile.setOnClickListener(v -> startActivity(new Intent(Home.this, Profile.class)));
         ivLogout.setOnClickListener(v -> confirmLogout());
-        loadGreeting();
 
         setupFilters();
         refreshButtons();
@@ -322,6 +321,7 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        loadGreeting(); // refresh name after editing profile
         sliderHandler.postDelayed(sliderRunnable, 3000);
     }
 
