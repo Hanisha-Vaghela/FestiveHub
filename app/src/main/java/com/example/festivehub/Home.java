@@ -91,7 +91,7 @@ public class Home extends AppCompatActivity {
 
         // Event list
         eventAdapter = new EventAdapter(new ArrayList<>(), this::openEventDetail);
-        rvEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvEvents.setLayoutManager(new LinearLayoutManager(this));
         rvEvents.setAdapter(eventAdapter);
 
         // Banner carousel

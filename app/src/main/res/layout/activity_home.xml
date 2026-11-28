@@ -56,6 +56,7 @@
                     android:background="@drawable/circle_bg"
                     android:contentDescription="Logout"
                     android:padding="@dimen/_6sdp"
+                    android:visibility="gone"
                     android:src="@drawable/logout" />
             </LinearLayout>
 
@@ -228,7 +229,6 @@
             android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:nestedScrollingEnabled="false"
-            android:paddingHorizontal="@dimen/_16sdp"
             android:paddingBottom="@dimen/_20sdp"
             tools:listitem="@layout/item_event_card" />
 

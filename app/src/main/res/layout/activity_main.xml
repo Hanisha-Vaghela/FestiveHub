@@ -1,26 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="#FFFFFF"
+    android:background="@drawable/splash_bg"
     tools:context=".MainActivity">
 
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="@dimen/_100sdp"
-        android:layout_height="@dimen/_100sdp"
-        app:srcCompat="@drawable/splashscreen_logo" />
-
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- Center: logo, app name and tagline -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/_20sdp"
-        android:text="Festive Hub"/>
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/_20sdp">
 
-</LinearLayout>
+        <!-- White circle behind the logo -->
+        <FrameLayout
+            android:layout_width="@dimen/_130sdp"
+            android:layout_height="@dimen/_130sdp"
+            android:background="@drawable/splash_logo_circle"
+            android:elevation="8dp">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="@dimen/_90sdp"
+                android:layout_height="@dimen/_90sdp"
+                android:layout_gravity="center"
+                android:contentDescription="FestiveHub logo"
+                app:srcCompat="@drawable/splashscreen_logo" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:fontFamily="sans-serif-medium"
+            android:text="FestiveHub"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_28sdp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_6sdp"
+            android:gravity="center"
+            android:text="Discover • Register • Celebrate"
+            android:textColor="@color/splash_tagline"
+            android:textSize="@dimen/_12sdp" />
+    </LinearLayout>
+
+    <!-- Bottom: loading spinner -->
+    <ProgressBar
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="@dimen/_50sdp"
+        android:indeterminateTint="@color/white" />
+
+</FrameLayout>

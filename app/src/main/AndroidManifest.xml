@@ -70,12 +70,27 @@
             android:exported="false" />
         <activity
             android:name=".Login"
+            android:theme="@style/Theme.FestiveHub.Auth"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
+
         <activity
             android:name=".SignUp"
+            android:theme="@style/Theme.FestiveHub.Auth"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".Login"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".SignUp"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".MainActivity"-->
+<!--            android:exported="true">-->
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.FestiveHub.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
